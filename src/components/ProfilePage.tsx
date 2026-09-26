@@ -16,13 +16,22 @@ import {
   Calendar,
   FileText,
   Award,
-  Bell
+  Bell,
+  TrendingUp,
+  BarChart3,
+  Activity,
+  Wheat,
+  Egg,
+  Store,
+  DollarSign,
+  PackageCheck
 } from 'lucide-react';
+import { AnimatedTrendChart } from './AnimatedTrendChart';
 
 export const ProfilePage: React.FC = () => {
   const { currentUser, setActiveTab } = useApp();
 
-  const [activeSubTab, setActiveSubTab] = useState<'info' | 'bank' | 'security'>('info');
+  const [activeSubTab, setActiveSubTab] = useState<'info' | 'analytics' | 'bank' | 'security'>('info');
   const [isSaved, setIsSaved] = useState(false);
 
   // Form State
@@ -63,6 +72,99 @@ export const ProfilePage: React.FC = () => {
 
   const badge = getRoleBadge();
 
+  // Role-Specific Profile Analytics Data
+  const getProfileChartData = () => {
+    switch (currentUser.role) {
+      case 'CORN_FARMER':
+        return {
+          title: 'Tren Produktivitas Panen & Mutu Kadar Air (KA)',
+          subtitle: 'Rekam jejak volume panen pipil kering (Ton) vs tingkat kepatuhan kadar air standar SNI (≤14%)',
+          unit: 'Ton',
+          secondaryUnit: '%',
+          primaryLegend: 'Volume Panen (Ton)',
+          secondaryLegend: 'Kadar Air Rata-rata (%)',
+          primaryColor: '#047857',
+          secondaryColor: '#D97706',
+          formatValue: (v: number) => `${v} Ton`,
+          formatSecondaryValue: (v: number) => `KA ${v}%`,
+          data: [
+            { label: 'Mei', dateStr: 'Mei 2026', value: 6.2, secondaryValue: 13.8 },
+            { label: 'Jun', dateStr: 'Juni 2026', value: 7.1, secondaryValue: 13.5 },
+            { label: 'Jul', dateStr: 'Juli 2026', value: 8.4, secondaryValue: 13.2 },
+            { label: 'Agu', dateStr: 'Agustus 2026', value: 7.8, secondaryValue: 13.4 },
+            { label: 'Sep', dateStr: 'September 2026', value: 8.5, secondaryValue: 13.5 },
+            { label: 'Okt (Est)', dateStr: 'Target Oktober', value: 9.2, secondaryValue: 13.3 },
+          ]
+        };
+      case 'EGG_FARMER':
+        return {
+          title: 'Efisiensi Produksi Telur Harian & Konversi Pakan (FCR)',
+          subtitle: 'Output telur harian kandang (rak/hari) vs rasio asupan pakan jagung pipil mandiri',
+          unit: 'rak',
+          secondaryUnit: 'kg',
+          primaryLegend: 'Produksi Telur (Rak/Hari)',
+          secondaryLegend: 'Konsumsi Pakan (Kg/Hari)',
+          primaryColor: '#047857',
+          secondaryColor: '#3B82F6',
+          formatValue: (v: number) => `${v} rak`,
+          formatSecondaryValue: (v: number) => `${v} kg`,
+          data: [
+            { label: 'Mei', dateStr: 'Mei 2026', value: 145, secondaryValue: 620 },
+            { label: 'Jun', dateStr: 'Juni 2026', value: 158, secondaryValue: 640 },
+            { label: 'Jul', dateStr: 'Juli 2026', value: 168, secondaryValue: 660 },
+            { label: 'Agu', dateStr: 'Agustus 2026', value: 175, secondaryValue: 660 },
+            { label: 'Sep', dateStr: 'September 2026', value: 182, secondaryValue: 660 },
+            { label: 'Okt (Est)', dateStr: 'Target Oktober', value: 188, secondaryValue: 660 },
+          ]
+        };
+      case 'UMKM_BUYER':
+        return {
+          title: 'Penyerapan Bahan Baku Telur & Akumulasi Penghematan HPP',
+          subtitle: 'Realisasi pasokan telur mingguan (rak) vs akumulasi efisiensi biaya dibanding pasar eceran',
+          unit: 'rak',
+          secondaryUnit: 'Rp',
+          primaryLegend: 'Penerimaan Telur (Rak)',
+          secondaryLegend: 'Akumulasi Hemat Biaya',
+          primaryColor: '#1D4ED8',
+          secondaryColor: '#047857',
+          formatValue: (v: number) => `${v} rak`,
+          formatSecondaryValue: (v: number) => `Rp ${(v / 1000).toFixed(0)} Ribu`,
+          data: [
+            { label: 'Mei', dateStr: 'Mei 2026', value: 110, secondaryValue: 880000 },
+            { label: 'Jun', dateStr: 'Juni 2026', value: 125, secondaryValue: 1880000 },
+            { label: 'Jul', dateStr: 'Juli 2026', value: 135, secondaryValue: 2960000 },
+            { label: 'Agu', dateStr: 'Agustus 2026', value: 140, secondaryValue: 4080000 },
+            { label: 'Sep', dateStr: 'September 2026', value: 150, secondaryValue: 5280000 },
+            { label: 'Okt (Est)', dateStr: 'Proyeksi Oktober', value: 160, secondaryValue: 6560000 },
+          ]
+        };
+      case 'ADMIN':
+      default:
+        return {
+          title: 'Pertumbuhan Nilai Transaksi & Akumulasi Kliring Pasigala',
+          subtitle: 'Volume perputaran komoditas terintegrasi dan bagi hasil ekosistem regional',
+          unit: 'Rp',
+          secondaryUnit: 'Rp',
+          primaryLegend: 'GMV Komoditas (Juta)',
+          secondaryLegend: 'Komisi Platform (Ribu)',
+          primaryColor: '#6D28D9',
+          secondaryColor: '#047857',
+          formatValue: (v: number) => `Rp ${(v / 1000000).toFixed(1)} Jt`,
+          formatSecondaryValue: (v: number) => `Rp ${(v / 1000).toFixed(0)} Rb`,
+          data: [
+            { label: 'Mei', dateStr: 'Mei 2026', value: 12500000, secondaryValue: 485000 },
+            { label: 'Jun', dateStr: 'Juni 2026', value: 18400000, secondaryValue: 712000 },
+            { label: 'Jul', dateStr: 'Juli 2026', value: 29800000, secondaryValue: 1150000 },
+            { label: 'Agu', dateStr: 'Agustus 2026', value: 38200000, secondaryValue: 1480000 },
+            { label: 'Sep', dateStr: 'September 2026', value: 53200000, secondaryValue: 2056000 },
+            { label: 'Okt (Est)', dateStr: 'Target Oktober', value: 68000000, secondaryValue: 2650000 },
+          ]
+        };
+    }
+  };
+
+  const chartConfig = getProfileChartData();
+
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
     setIsSaved(true);
@@ -70,7 +172,7 @@ export const ProfilePage: React.FC = () => {
   };
 
   return (
-    <div style={{ maxWidth: '1080px', margin: '0 auto', padding: '28px 24px 60px 24px' }}>
+    <div style={{ maxWidth: '1120px', margin: '0 auto', padding: '28px 24px 60px 24px' }}>
       {/* Breadcrumb & Navigation */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.82rem', color: 'var(--slate-500)' }}>
@@ -86,7 +188,7 @@ export const ProfilePage: React.FC = () => {
             Dashboard
           </span>
           <span>/</span>
-          <span style={{ color: 'var(--slate-800)', fontWeight: 700 }}>Profil & Pengaturan Akun</span>
+          <span style={{ color: 'var(--slate-800)', fontWeight: 700 }}>Profil & Analitik Akun</span>
         </div>
       </div>
 
@@ -192,7 +294,8 @@ export const ProfilePage: React.FC = () => {
         display: 'flex',
         gap: '8px',
         borderBottom: '1px solid var(--border-subtle)',
-        marginBottom: '24px'
+        marginBottom: '24px',
+        overflowX: 'auto'
       }}>
         <button
           type="button"
@@ -209,10 +312,33 @@ export const ProfilePage: React.FC = () => {
             display: 'flex',
             alignItems: 'center',
             gap: '8px',
-            marginBottom: '-1px'
+            marginBottom: '-1px',
+            whiteSpace: 'nowrap'
           }}
         >
           <User size={16} /> Identitas & Lokasi Usaha
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveSubTab('analytics')}
+          style={{
+            background: 'none',
+            border: 'none',
+            borderBottom: activeSubTab === 'analytics' ? '2px solid var(--primary-700)' : '2px solid transparent',
+            color: activeSubTab === 'analytics' ? 'var(--primary-700)' : 'var(--slate-500)',
+            fontWeight: activeSubTab === 'analytics' ? 700 : 500,
+            fontSize: '0.86rem',
+            padding: '10px 16px',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            marginBottom: '-1px',
+            whiteSpace: 'nowrap'
+          }}
+        >
+          <BarChart3 size={16} /> Statistik & Kinerja Historis
         </button>
 
         <button
@@ -230,7 +356,8 @@ export const ProfilePage: React.FC = () => {
             display: 'flex',
             alignItems: 'center',
             gap: '8px',
-            marginBottom: '-1px'
+            marginBottom: '-1px',
+            whiteSpace: 'nowrap'
           }}
         >
           <CreditCard size={16} /> Rekening Bank Escrow
@@ -251,12 +378,14 @@ export const ProfilePage: React.FC = () => {
             display: 'flex',
             alignItems: 'center',
             gap: '8px',
-            marginBottom: '-1px'
+            marginBottom: '-1px',
+            whiteSpace: 'nowrap'
           }}
         >
           <Lock size={16} /> Keamanan & Preferensi
         </button>
       </div>
+
 
       {/* Save Success Alert */}
       {isSaved && (
@@ -426,6 +555,128 @@ export const ProfilePage: React.FC = () => {
           </div>
         )}
 
+        {activeSubTab === 'analytics' && (
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+            {/* 3 KPI Summary Cards */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
+              {currentUser.role === 'CORN_FARMER' && (
+                <>
+                  <div style={{ background: '#FFFFFF', border: '1px solid var(--border-subtle)', borderRadius: '12px', padding: '18px 20px' }}>
+                    <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--slate-500)', textTransform: 'uppercase' }}>Total Panen Terserap</div>
+                    <div style={{ fontSize: '1.65rem', fontWeight: 800, color: '#047857', marginTop: '4px' }}>48.5 <span style={{ fontSize: '0.84rem', color: 'var(--slate-400)' }}>Ton</span></div>
+                    <div style={{ fontSize: '0.74rem', color: 'var(--slate-500)', marginTop: '2px' }}>Terserap langsung ke peternak layer</div>
+                  </div>
+                  <div style={{ background: '#FFFFFF', border: '1px solid var(--border-subtle)', borderRadius: '12px', padding: '18px 20px' }}>
+                    <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--slate-500)', textTransform: 'uppercase' }}>Kepatuhan SNI Kadar Air</div>
+                    <div style={{ fontSize: '1.65rem', fontWeight: 800, color: '#D97706', marginTop: '4px' }}>99.4% <span style={{ fontSize: '0.84rem', color: 'var(--slate-400)' }}>Lolos Uji</span></div>
+                    <div style={{ fontSize: '0.74rem', color: 'var(--slate-500)', marginTop: '2px' }}>Rata-rata KA 13.4% (SNI ≤14.0%)</div>
+                  </div>
+                  <div style={{ background: '#FFFFFF', border: '1px solid var(--border-subtle)', borderRadius: '12px', padding: '18px 20px' }}>
+                    <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--slate-500)', textTransform: 'uppercase' }}>Total Payout Escrow</div>
+                    <div style={{ fontSize: '1.65rem', fontWeight: 800, color: '#047857', marginTop: '4px' }}>Rp 245.5 <span style={{ fontSize: '0.84rem', color: 'var(--slate-400)' }}>Juta</span></div>
+                    <div style={{ fontSize: '0.74rem', color: 'var(--slate-500)', marginTop: '2px' }}>Pencairan 100% amanah tanpa calo</div>
+                  </div>
+                </>
+              )}
+
+              {currentUser.role === 'EGG_FARMER' && (
+                <>
+                  <div style={{ background: '#FFFFFF', border: '1px solid var(--border-subtle)', borderRadius: '12px', padding: '18px 20px' }}>
+                    <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--slate-500)', textTransform: 'uppercase' }}>Distribusi Telur Kumulatif</div>
+                    <div style={{ fontSize: '1.65rem', fontWeight: 800, color: '#047857', marginTop: '4px' }}>12.400 <span style={{ fontSize: '0.84rem', color: 'var(--slate-400)' }}>Rak</span></div>
+                    <div style={{ fontSize: '0.74rem', color: 'var(--slate-500)', marginTop: '2px' }}>Pasokan rutin ke UMKM & resto</div>
+                  </div>
+                  <div style={{ background: '#FFFFFF', border: '1px solid var(--border-subtle)', borderRadius: '12px', padding: '18px 20px' }}>
+                    <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--slate-500)', textTransform: 'uppercase' }}>On-Time Delivery SLA</div>
+                    <div style={{ fontSize: '1.65rem', fontWeight: 800, color: '#3B82F6', marginTop: '4px' }}>100% <span style={{ fontSize: '0.84rem', color: 'var(--slate-400)' }}>Tepat Waktu</span></div>
+                    <div style={{ fontSize: '0.74rem', color: 'var(--slate-500)', marginTop: '2px' }}>Seluruh jadwal B2B terpenuhi</div>
+                  </div>
+                  <div style={{ background: '#FFFFFF', border: '1px solid var(--border-subtle)', borderRadius: '12px', padding: '18px 20px' }}>
+                    <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--slate-500)', textTransform: 'uppercase' }}>Efisiensi FCR Pakan</div>
+                    <div style={{ fontSize: '1.65rem', fontWeight: 800, color: '#6D28D9', marginTop: '4px' }}>2.15 <span style={{ fontSize: '0.84rem', color: 'var(--slate-400)' }}>Ratio</span></div>
+                    <div style={{ fontSize: '0.74rem', color: 'var(--slate-500)', marginTop: '2px' }}>Formulasi jagung pipil mandiri Sigi</div>
+                  </div>
+                </>
+              )}
+
+              {currentUser.role === 'UMKM_BUYER' && (
+                <>
+                  <div style={{ background: '#FFFFFF', border: '1px solid var(--border-subtle)', borderRadius: '12px', padding: '18px 20px' }}>
+                    <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--slate-500)', textTransform: 'uppercase' }}>Bahan Baku Diterima</div>
+                    <div style={{ fontSize: '1.65rem', fontWeight: 800, color: '#1D4ED8', marginTop: '4px' }}>820 <span style={{ fontSize: '0.84rem', color: 'var(--slate-400)' }}>Rak</span></div>
+                    <div style={{ fontSize: '0.74rem', color: 'var(--slate-500)', marginTop: '2px' }}>Grade A Segar (24.600 Butir)</div>
+                  </div>
+                  <div style={{ background: '#FFFFFF', border: '1px solid var(--border-subtle)', borderRadius: '12px', padding: '18px 20px' }}>
+                    <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--slate-500)', textTransform: 'uppercase' }}>Efisiensi Biaya Pokok</div>
+                    <div style={{ fontSize: '1.65rem', fontWeight: 800, color: '#047857', marginTop: '4px' }}>+8.2% <span style={{ fontSize: '0.84rem', color: 'var(--slate-400)' }}>Margin</span></div>
+                    <div style={{ fontSize: '0.74rem', color: 'var(--slate-500)', marginTop: '2px' }}>Penghematan vs harga pasar eceran</div>
+                  </div>
+                  <div style={{ background: '#FFFFFF', border: '1px solid var(--border-subtle)', borderRadius: '12px', padding: '18px 20px' }}>
+                    <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--slate-500)', textTransform: 'uppercase' }}>Akumulasi Hemat Biaya</div>
+                    <div style={{ fontSize: '1.65rem', fontWeight: 800, color: '#047857', marginTop: '4px' }}>Rp 5.28 <span style={{ fontSize: '0.84rem', color: 'var(--slate-400)' }}>Juta</span></div>
+                    <div style={{ fontSize: '0.74rem', color: 'var(--slate-500)', marginTop: '2px' }}>Terproteksi kontrak B2B harga tetap</div>
+                  </div>
+                </>
+              )}
+
+              {currentUser.role === 'ADMIN' && (
+                <>
+                  <div style={{ background: '#FFFFFF', border: '1px solid var(--border-subtle)', borderRadius: '12px', padding: '18px 20px' }}>
+                    <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--slate-500)', textTransform: 'uppercase' }}>Gross Merchandise Value</div>
+                    <div style={{ fontSize: '1.65rem', fontWeight: 800, color: '#6D28D9', marginTop: '4px' }}>Rp 53.2 <span style={{ fontSize: '0.84rem', color: 'var(--slate-400)' }}>Juta</span></div>
+                    <div style={{ fontSize: '0.74rem', color: 'var(--slate-500)', marginTop: '2px' }}>Nilai transaksi komoditas beredar</div>
+                  </div>
+                  <div style={{ background: '#FFFFFF', border: '1px solid var(--border-subtle)', borderRadius: '12px', padding: '18px 20px' }}>
+                    <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--slate-500)', textTransform: 'uppercase' }}>Tingkat Mediasi Selesai</div>
+                    <div style={{ fontSize: '1.65rem', fontWeight: 800, color: '#047857', marginTop: '4px' }}>100% <span style={{ fontSize: '0.84rem', color: 'var(--slate-400)' }}>Tuntas</span></div>
+                    <div style={{ fontSize: '0.74rem', color: 'var(--slate-500)', marginTop: '2px' }}>Musyawarah arbitrase transparan</div>
+                  </div>
+                  <div style={{ background: '#FFFFFF', border: '1px solid var(--border-subtle)', borderRadius: '12px', padding: '18px 20px' }}>
+                    <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--slate-500)', textTransform: 'uppercase' }}>Mitra Terverifikasi</div>
+                    <div style={{ fontSize: '1.65rem', fontWeight: 800, color: '#1E293B', marginTop: '4px' }}>4 <span style={{ fontSize: '0.84rem', color: 'var(--slate-400)' }}>Pelaku Usaha</span></div>
+                    <div style={{ fontSize: '0.74rem', color: 'var(--slate-500)', marginTop: '2px' }}>Rantai Pasok Pasigala Aktif</div>
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* Main Interactive Chart */}
+            <div style={{ background: '#FFFFFF', border: '1px solid var(--border-subtle)', borderRadius: '14px', padding: '20px' }}>
+              <AnimatedTrendChart 
+                title={chartConfig.title}
+                subtitle={chartConfig.subtitle}
+                unit={chartConfig.unit}
+                secondaryUnit={chartConfig.secondaryUnit}
+                primaryLegend={chartConfig.primaryLegend}
+                secondaryLegend={chartConfig.secondaryLegend}
+                primaryColor={chartConfig.primaryColor}
+                secondaryColor={chartConfig.secondaryColor}
+                data={chartConfig.data}
+                formatValue={chartConfig.formatValue}
+                formatSecondaryValue={chartConfig.formatSecondaryValue}
+                height={220}
+              />
+            </div>
+
+            {/* Quality & Audit Certification Row */}
+            <div style={{ background: '#F8FAFC', border: '1px solid var(--border-subtle)', borderRadius: '14px', padding: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '14px' }}>
+              <div>
+                <div style={{ fontSize: '0.88rem', fontWeight: 800, color: 'var(--slate-900)' }}>
+                  Audit Integritas Data & Standar Mutu Komoditas
+                </div>
+                <div style={{ fontSize: '0.76rem', color: 'var(--slate-600)', marginTop: '2px' }}>
+                  Seluruh data transaksi dan pengujian mutu telah divalidasi oleh Berita Acara Serah Terima (BAST) digital.
+                </div>
+              </div>
+
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: '#ECFDF5', border: '1px solid #A7F3D0', padding: '6px 14px', borderRadius: '8px', fontSize: '0.78rem', color: '#047857', fontWeight: 700 }}>
+                <CheckCircle2 size={16} /> Data Tervalidasi Resmi
+              </div>
+            </div>
+          </div>
+        )}
+
         {activeSubTab === 'bank' && (
           <div style={{ maxWidth: '680px', background: '#FFFFFF', border: '1px solid var(--border-subtle)', borderRadius: '14px', padding: '24px' }}>
             <h2 style={{ fontSize: '0.96rem', fontWeight: 800, color: 'var(--slate-900)', margin: '0 0 8px 0' }}>
@@ -434,6 +685,7 @@ export const ProfilePage: React.FC = () => {
             <p style={{ fontSize: '0.78rem', color: 'var(--slate-500)', margin: '0 0 20px 0' }}>
               Dana hasil penjualan otomatis dicairkan ke rekening ini setelah Berita Acara Serah Terima (BAST) terkonfirmasi.
             </p>
+
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <div>

@@ -18,6 +18,7 @@ import {
   AlertCircle
 } from 'lucide-react';
 import { TransactionOrder } from '../types';
+import { AnimatedTrendChart } from './AnimatedTrendChart';
 
 interface FarmerDashboardProps {
   onSelectOrder: (order: TransactionOrder) => void;
@@ -43,6 +44,16 @@ export const FarmerDashboard: React.FC<FarmerDashboardProps> = ({ onSelectOrder 
   const pendingRequests = mySalesOrders.filter(
     o => o.status === 'pending_confirmation' || (o.negotiation && o.negotiation.status === 'pending')
   );
+
+  const cornHarvestTrend = [
+    { label: 'Mei', dateStr: 'Mei 2026', value: 6.2, secondaryValue: 32240000 },
+    { label: 'Jun', dateStr: 'Juni 2026', value: 7.1, secondaryValue: 36920000 },
+    { label: 'Jul', dateStr: 'Juli 2026', value: 8.4, secondaryValue: 43680000 },
+    { label: 'Agu', dateStr: 'Agustus 2026', value: 7.8, secondaryValue: 40560000 },
+    { label: 'Sep W1', dateStr: 'Minggu 1-2 Sep', value: 8.5, secondaryValue: 44200000 },
+    { label: 'Sep Terkini', dateStr: 'Sigi Biromaru', value: totalStockKg > 0 ? Number((totalStockKg / 1000).toFixed(1)) : 8.5, secondaryValue: totalRevenue > 0 ? totalRevenue : 44200000 },
+  ];
+
 
   return (
     <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '28px 24px 60px 24px' }}>
@@ -165,8 +176,26 @@ export const FarmerDashboard: React.FC<FarmerDashboardProps> = ({ onSelectOrder 
       <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 320px', gap: '24px' }}>
         {/* Left: Active Lots & Sales Logs */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+          
+          {/* Animated Trend Chart */}
+          <AnimatedTrendChart 
+            title="Tren Hasil Panen Jagung Pipil & Omzet Penjualan"
+            subtitle="Volume penyerapan jagung kering ke peternak ayam (Ton) dan perputaran dana escrow"
+            unit="Ton"
+            secondaryUnit="Rp"
+            primaryLegend="Volume Panen (Ton)"
+            secondaryLegend="Omzet Penjualan (Juta)"
+            primaryColor="#047857"
+            secondaryColor="#D97706"
+            data={cornHarvestTrend}
+            formatValue={(v) => `${v} Ton`}
+            formatSecondaryValue={(v) => `Rp ${(v / 1000000).toFixed(1)} Jt`}
+            height={190}
+          />
+
           {/* Active Corn Lots */}
           <div style={{ background: '#FFFFFF', border: '1px solid var(--border-subtle)', borderRadius: '12px', overflow: 'hidden' }}>
+
             <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--border-subtle)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
                 <h2 style={{ fontSize: '0.94rem', fontWeight: 800, color: 'var(--slate-900)', margin: 0 }}>
