@@ -909,7 +909,18 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const loginAs = (userKey: string) => {
     setActiveUserKey(userKey);
     setIsAuthenticated(true);
-    triggerCelebration();
+    const user = allUsers[userKey] || SEED_USERS[userKey];
+    if (user) {
+      if (user.role === 'CORN_FARMER') {
+        setActiveTab('dashboard_farmer');
+      } else if (user.role === 'EGG_FARMER') {
+        setActiveTab('dashboard_egg_farmer');
+      } else if (user.role === 'UMKM_BUYER') {
+        setActiveTab('dashboard_umkm');
+      } else if (user.role === 'ADMIN') {
+        setActiveTab('admin');
+      }
+    }
   };
 
   const logout = () => {

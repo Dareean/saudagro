@@ -258,146 +258,150 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         className={`auth-modal-card ${authMode === 'login' ? 'login-mode' : ''}`}
         onClick={e => e.stopPropagation()}
       >
-        {/* Modal Header */}
-        <div style={{ 
-          padding: '20px 24px 16px 24px', 
-          borderBottom: '1px solid var(--border-subtle)', 
-          display: 'flex', 
-          alignItems: 'center', 
-          justifyContent: 'space-between', 
-          background: 'linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 100%)' 
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <div style={{ 
-              width: '42px', 
-              height: '42px', 
-              borderRadius: '12px', 
-              background: 'white', 
-              border: '1px solid var(--border-subtle)', 
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'center', 
-              padding: '4px', 
-              boxShadow: '0 2px 6px rgba(15, 23, 42, 0.05)', 
-              flexShrink: 0 
-            }}>
-              <img 
-                src="/logo/saudagro-icon.png" 
-                alt="Saudagro" 
-                style={{ width: '100%', height: '100%', objectFit: 'contain' }} 
-              />
-            </div>
-            <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--slate-900)', letterSpacing: '-0.02em', margin: 0 }}>
-                  {authMode === 'login' ? 'Masuk ke Platform' : 'Pendaftaran Akun Mitra'}
-                </h3>
-                <span style={{ 
-                  background: '#ECFDF5', 
-                  color: '#047857', 
-                  border: '1px solid #A7F3D0', 
-                  padding: '2px 7px', 
-                  borderRadius: '6px', 
-                  fontSize: '0.65rem', 
-                  fontWeight: 800,
-                  letterSpacing: '0.02em'
-                }}>
-                  RESMI SULTENG
-                </span>
+        {/* Sticky Header & Tabs Container (Stays fixed when scrolling) */}
+        <div className="auth-modal-header-sticky">
+          {/* Modal Header */}
+          <div style={{ 
+            padding: '18px 24px 14px 24px', 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'space-between', 
+            background: 'linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 100%)' 
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <div style={{ 
+                width: '42px', 
+                height: '42px', 
+                borderRadius: '12px', 
+                background: 'white', 
+                border: '1px solid var(--border-subtle)', 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'center', 
+                padding: '4px', 
+                boxShadow: '0 2px 6px rgba(15, 23, 42, 0.05)', 
+                flexShrink: 0 
+              }}>
+                <img 
+                  src="/logo/saudagro-icon.png" 
+                  alt="Saudagro" 
+                  style={{ width: '100%', height: '100%', objectFit: 'contain' }} 
+                />
               </div>
-              <p style={{ fontSize: '0.78rem', color: 'var(--slate-500)', marginTop: '2px', margin: 0 }}>
-                Pusat Mediasi & Rantai Pasok Agribisnis Terpercaya
-              </p>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                  <h3 style={{ fontSize: '1.18rem', fontWeight: 800, color: 'var(--slate-900)', letterSpacing: '-0.02em', margin: 0 }}>
+                    {authMode === 'login' ? 'Masuk ke Platform' : 'Pendaftaran Akun Mitra'}
+                  </h3>
+                  <span style={{ 
+                    background: '#ECFDF5', 
+                    color: '#047857', 
+                    border: '1px solid #A7F3D0', 
+                    padding: '2px 7px', 
+                    borderRadius: '6px', 
+                    fontSize: '0.65rem', 
+                    fontWeight: 800,
+                    letterSpacing: '0.02em'
+                  }}>
+                    RESMI SULTENG
+                  </span>
+                </div>
+                <p style={{ fontSize: '0.78rem', color: 'var(--slate-500)', marginTop: '2px', margin: 0 }}>
+                  Pusat Mediasi & Rantai Pasok Agribisnis Terpercaya
+                </p>
+              </div>
+            </div>
+            <button 
+              className="modal-close-btn" 
+              onClick={onClose}
+              aria-label="Tutup Modal"
+              style={{ 
+                width: '32px', 
+                height: '32px', 
+                borderRadius: '50%', 
+                background: 'var(--slate-100)', 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'center', 
+                border: 'none', 
+                cursor: 'pointer', 
+                color: 'var(--slate-500)', 
+                transition: 'background 0.2s',
+                flexShrink: 0
+              }}
+            >
+              <X size={17} />
+            </button>
+          </div>
+
+          {/* Segmented Tab Switcher */}
+          <div style={{ padding: '0 24px 14px 24px', background: '#F8FAFC', borderTop: '1px solid var(--border-subtle)', paddingTop: '12px' }}>
+            <div style={{ 
+              display: 'flex', 
+              background: 'var(--slate-200)', 
+              padding: '4px', 
+              borderRadius: '12px'
+            }}>
+              <button 
+                type="button" 
+                onClick={() => {
+                  setAuthMode('login');
+                  setFormError(null);
+                }}
+                style={{ 
+                  flex: 1,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  padding: '8px 14px',
+                  borderRadius: '9px',
+                  fontSize: '0.86rem',
+                  fontWeight: 700,
+                  border: 'none',
+                  cursor: 'pointer',
+                  background: authMode === 'login' ? 'white' : 'transparent',
+                  color: authMode === 'login' ? 'var(--primary-700)' : 'var(--slate-600)',
+                  boxShadow: authMode === 'login' ? '0 2px 6px rgba(15, 23, 42, 0.08)' : 'none',
+                  transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)'
+                }}
+              >
+                <LogIn size={15} /> 
+                <span>Masuk Akun</span>
+              </button>
+              <button 
+                type="button" 
+                onClick={() => {
+                  setAuthMode('register');
+                  setFormError(null);
+                }}
+                style={{ 
+                  flex: 1,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  padding: '8px 14px',
+                  borderRadius: '9px',
+                  fontSize: '0.86rem',
+                  fontWeight: 700,
+                  border: 'none',
+                  cursor: 'pointer',
+                  background: authMode === 'register' ? 'white' : 'transparent',
+                  color: authMode === 'register' ? 'var(--primary-700)' : 'var(--slate-600)',
+                  boxShadow: authMode === 'register' ? '0 2px 6px rgba(15, 23, 42, 0.08)' : 'none',
+                  transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)'
+                }}
+              >
+                <UserPlus size={15} /> 
+                <span>Daftar Akun Baru</span>
+              </button>
             </div>
           </div>
-          <button 
-            className="modal-close-btn" 
-            onClick={onClose}
-            aria-label="Tutup Modal"
-            style={{ 
-              width: '32px', 
-              height: '32px', 
-              borderRadius: '50%', 
-              background: 'var(--slate-100)', 
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'center', 
-              border: 'none', 
-              cursor: 'pointer', 
-              color: 'var(--slate-500)', 
-              transition: 'background 0.2s',
-              flexShrink: 0
-            }}
-          >
-            <X size={17} />
-          </button>
         </div>
 
-        <div style={{ padding: '20px 24px 24px 24px' }}>
-          {/* Segmented Tab Switcher */}
-          <div style={{ 
-            display: 'flex', 
-            background: 'var(--slate-100)', 
-            padding: '4px', 
-            borderRadius: '12px', 
-            marginBottom: '20px',
-            border: '1px solid var(--border-subtle)'
-          }}>
-            <button 
-              type="button" 
-              onClick={() => {
-                setAuthMode('login');
-                setFormError(null);
-              }}
-              style={{ 
-                flex: 1,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '8px',
-                padding: '8px 14px',
-                borderRadius: '9px',
-                fontSize: '0.86rem',
-                fontWeight: 700,
-                border: 'none',
-                cursor: 'pointer',
-                background: authMode === 'login' ? 'white' : 'transparent',
-                color: authMode === 'login' ? 'var(--primary-700)' : 'var(--slate-600)',
-                boxShadow: authMode === 'login' ? '0 2px 6px rgba(15, 23, 42, 0.08)' : 'none',
-                transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)'
-              }}
-            >
-              <LogIn size={15} /> 
-              <span>Masuk Akun</span>
-            </button>
-            <button 
-              type="button" 
-              onClick={() => {
-                setAuthMode('register');
-                setFormError(null);
-              }}
-              style={{ 
-                flex: 1,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '8px',
-                padding: '8px 14px',
-                borderRadius: '9px',
-                fontSize: '0.86rem',
-                fontWeight: 700,
-                border: 'none',
-                cursor: 'pointer',
-                background: authMode === 'register' ? 'white' : 'transparent',
-                color: authMode === 'register' ? 'var(--primary-700)' : 'var(--slate-600)',
-                boxShadow: authMode === 'register' ? '0 2px 6px rgba(15, 23, 42, 0.08)' : 'none',
-                transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)'
-              }}
-            >
-              <UserPlus size={15} /> 
-              <span>Daftar Akun Baru</span>
-            </button>
-          </div>
+        {/* Scrollable Form Body */}
+        <div className="auth-modal-body">
 
           {/* Inline Error Alert */}
           {formError && (

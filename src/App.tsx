@@ -19,7 +19,7 @@ import { MobileNav } from './components/MobileNav';
 import { TransactionOrder, B2BContract } from './types';
 
 const MainApp: React.FC = () => {
-  const { activeTab, isAuthenticated } = useApp();
+  const { activeTab, isAuthenticated, currentUser } = useApp();
 
   const [selectedOrder, setSelectedOrder] = useState<TransactionOrder | null>(null);
   const [selectedContract, setSelectedContract] = useState<B2BContract | null>(null);
@@ -41,6 +41,11 @@ const MainApp: React.FC = () => {
     );
   }
 
+  const isFarmerRole = currentUser.role === 'CORN_FARMER';
+  const isEggFarmerRole = currentUser.role === 'EGG_FARMER';
+  const isUMKMRole = currentUser.role === 'UMKM_BUYER';
+  const isAdminRole = currentUser.role === 'ADMIN';
+
   return (
     <div className="app-container">
       {/* Header Bar */}
@@ -57,22 +62,26 @@ const MainApp: React.FC = () => {
         {activeTab === 'market_corn' && <MarketplaceCorn />}
         {activeTab === 'market_eggs' && <MarketplaceEggs />}
         
-        {activeTab === 'dashboard_farmer' && (
+        {(activeTab === 'dashboard_farmer' || (activeTab === 'dashboard' && isFarmerRole)) && (
           <FarmerDashboard onSelectOrder={setSelectedOrder} />
         )}
         
-        {activeTab === 'dashboard_egg_farmer' && (
+        {(activeTab === 'dashboard_egg_farmer' || (activeTab === 'dashboard' && isEggFarmerRole)) && (
           <EggFarmerDashboard 
             onSelectOrder={setSelectedOrder} 
             onSelectContract={setSelectedContract} 
           />
         )}
         
-        {activeTab === 'dashboard_umkm' && (
+        {(activeTab === 'dashboard_umkm' || (activeTab === 'dashboard' && isUMKMRole)) && (
           <UMKMDashboard 
             onSelectOrder={setSelectedOrder} 
             onSelectContract={setSelectedContract} 
           />
+        )}
+
+        {(activeTab === 'admin' || (activeTab === 'dashboard' && isAdminRole)) && (
+          <AdminDashboard onSelectOrder={setSelectedOrder} />
         )}
 
         {activeTab === 'contracts' && (
@@ -81,10 +90,6 @@ const MainApp: React.FC = () => {
 
         {activeTab === 'history' && (
           <TransactionHistoryView onSelectOrder={setSelectedOrder} />
-        )}
-
-        {activeTab === 'admin' && (
-          <AdminDashboard onSelectOrder={setSelectedOrder} />
         )}
       </main>
 

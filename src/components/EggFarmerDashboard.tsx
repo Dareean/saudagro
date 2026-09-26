@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { 
   Egg, 
@@ -13,7 +13,12 @@ import {
   Star,
   Package,
   Layers,
-  Store
+  Store,
+  TrendingUp,
+  DollarSign,
+  AlertCircle,
+  Phone,
+  Calendar
 } from 'lucide-react';
 import { TransactionOrder, B2BContract } from '../types';
 
@@ -34,240 +39,331 @@ export const EggFarmerDashboard: React.FC<EggFarmerDashboardProps> = ({
     fulfillContractCycle 
   } = useApp();
 
-  // Dual-sided data:
-  // 1. My Corn Feed Purchases (Buy side)
+  // Buy side: Corn Feed Purchases
   const myFeedOrders = orders.filter(o => o.buyerId === currentUser.id && o.type === 'CORN');
   const totalFeedProcuredKg = myFeedOrders
     .filter(o => o.status === 'completed')
     .reduce((acc, o) => acc + o.quantity, 0);
 
-  // 2. My Egg Sales & Contracts (Sell side)
+  // Sell side: Egg Contracts & One-off Orders
   const myEggOrders = orders.filter(o => o.sellerId === currentUser.id);
   const myContracts = contracts.filter(c => c.sellerId === currentUser.id);
-
   const activeContractsCount = myContracts.filter(c => c.status === 'active').length;
 
+  const totalEggRevenue = myEggOrders
+    .filter(o => o.status === 'completed')
+    .reduce((acc, o) => acc + o.sellerNetRevenue, 0) +
+    myContracts.reduce((acc, c) => acc + (c.completedCycles * c.volumePerCycle * c.pricePerUnit * 0.95), 0);
+
   return (
-    <div className="main-wrapper" style={{ marginTop: '24px' }}>
-      {/* Title & Overview */}
-      <div style={{ marginBottom: '24px' }}>
-        <h1 className="section-title">
-          <Egg style={{ color: 'var(--egg-600)' }} />
-          Dashboard Peternak Ayam — {currentUser.name}
-        </h1>
-        <p className="section-desc">
-          Pusat integrasi ganda: Pengadaan pakan jagung langsung dari petani & Penjualan telur kontrak B2B ke UMKM.
-        </p>
-      </div>
-
-      {/* Dual Sided Metrics */}
-      <div className="grid-4" style={{ marginBottom: '24px' }}>
-        <div className="card card-p" style={{ borderLeft: '4px solid var(--harvest-500)' }}>
-          <div style={{ fontSize: '0.75rem', color: 'var(--slate-500)', fontWeight: 700, textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '5px' }}>
-            <Wheat size={14} style={{ color: 'var(--harvest-600)' }} /> Pakan Jagung Terbeli
+    <div className="pro-dashboard-wrapper">
+      {/* Header Bar */}
+      <div className="pro-dashboard-header">
+        <div>
+          <div className="pro-breadcrumb">
+            <span>Beranda</span>
+            <span>/</span>
+            <span className="active">Dashboard Peternak Ayam</span>
           </div>
-          <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--slate-900)', marginTop: '4px' }}>
-            {totalFeedProcuredKg.toLocaleString()} <span style={{ fontSize: '0.85rem' }}>Kg</span>
-          </div>
-          <div style={{ fontSize: '0.72rem', color: 'var(--harvest-700)', marginTop: '2px' }}>
-            Langsung dari petani Sigi/Donggala
-          </div>
+          <h1 className="pro-dashboard-title">
+            <div style={{ 
+              width: '36px', 
+              height: '36px', 
+              borderRadius: '10px', 
+              background: '#ECFDF5', 
+              color: '#047857', 
+              display: 'inline-flex', 
+              alignItems: 'center', 
+              justifyContent: 'center' 
+            }}>
+              <Egg size={20} />
+            </div>
+            Dashboard Rantai Pasok Pakan & Penjualan Telur
+          </h1>
+          <p className="pro-dashboard-subtitle">
+            Pusat integrasi ganda: Pengadaan pakan jagung langsung dari petani Sigi & Penjualan pasokan telur kontrak B2B ke UMKM Palu.
+          </p>
         </div>
 
-        <div className="card card-p" style={{ borderLeft: '4px solid var(--primary-600)' }}>
-          <div style={{ fontSize: '0.75rem', color: 'var(--slate-500)', fontWeight: 700, textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '5px' }}>
-            <FileCheck2 size={14} style={{ color: 'var(--primary-600)' }} /> Kontrak B2B Aktif
-          </div>
-          <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--primary-800)', marginTop: '4px' }}>
-            {activeContractsCount} <span style={{ fontSize: '0.85rem' }}>Mitra UMKM</span>
-          </div>
-          <div style={{ fontSize: '0.72rem', color: 'var(--primary-700)', marginTop: '2px' }}>
-            Pasokan rutin harga terkunci
-          </div>
-        </div>
-
-        <div className="card card-p" style={{ borderLeft: '4px solid #3b82f6' }}>
-          <div style={{ fontSize: '0.75rem', color: 'var(--slate-500)', fontWeight: 700, textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '5px' }}>
-            <Egg size={14} style={{ color: '#3b82f6' }} /> Kapasitas Produksi
-          </div>
-          <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--slate-900)', marginTop: '4px' }}>
-            150-180 <span style={{ fontSize: '0.85rem' }}>Rak/Hari</span>
-          </div>
-          <div style={{ fontSize: '0.72rem', color: 'var(--slate-500)', marginTop: '2px' }}>
-            6.000 Ekor Layer Hen
-          </div>
-        </div>
-
-        <div className="card card-p" style={{ borderLeft: '4px solid #eab308' }}>
-          <div style={{ fontSize: '0.75rem', color: 'var(--slate-500)', fontWeight: 700, textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '5px' }}>
-            <Star size={14} style={{ color: '#eab308' }} /> Skor Reputasi
-          </div>
-          <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--slate-900)', marginTop: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <Star size={18} fill="#eab308" color="#eab308" /> {currentUser.rating}
-          </div>
-          <div style={{ fontSize: '0.72rem', color: 'var(--slate-500)', marginTop: '2px' }}>
-            {currentUser.reviewCount} Ulasan Terverifikasi
-          </div>
-        </div>
-      </div>
-
-      {/* Active B2B Contracts Highlights */}
-      <div style={{ marginBottom: '24px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-          <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--slate-900)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <FileCheck2 style={{ color: 'var(--primary-700)' }} />
-            Kontrak Pasokan Rutin B2B ke UMKM
-          </h3>
-          <button className="btn btn-sm btn-outline" onClick={() => setActiveTab('market_eggs')}>
-            <PlusCircle size={14} /> Pasang Kuota Telur Baru
+        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+          <button 
+            className="btn btn-secondary"
+            onClick={() => setActiveTab('market_corn')}
+            style={{ padding: '9px 16px', fontSize: '0.84rem', fontWeight: 700, borderRadius: '10px' }}
+          >
+            <Wheat size={15} style={{ color: '#D97706' }} /> Pesan Pakan Jagung
+          </button>
+          <button 
+            className="btn btn-primary"
+            onClick={() => setActiveTab('market_eggs')}
+            style={{ padding: '9px 18px', fontSize: '0.84rem', fontWeight: 700, borderRadius: '10px' }}
+          >
+            <PlusCircle size={16} /> Kelola Pasokan Telur
           </button>
         </div>
+      </div>
 
-        <div className="grid-2">
-          {myContracts.map(contract => {
-            const nextScheduled = contract.cycles.find(c => c.status === 'scheduled');
-            return (
-              <div 
-                key={contract.id} 
-                className="card card-p"
-                style={{ borderTop: '4px solid var(--primary-600)', cursor: 'pointer' }}
-                onClick={() => onSelectContract(contract)}
-              >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
-                  <div>
-                    <div style={{ fontWeight: 800, fontSize: '1.05rem', color: 'var(--slate-900)' }}>
-                      {contract.buyerBusiness}
-                    </div>
-                    <div style={{ fontSize: '0.8rem', color: 'var(--slate-500)' }}>
-                      PIC: {contract.buyerName} • {contract.code}
-                    </div>
-                  </div>
-                  <span className="badge badge-success">
-                    {contract.status === 'active' ? 'Kontrak Berjalan' : 'Selesai'}
-                  </span>
-                </div>
+      {/* KPI Cards Grid */}
+      <div className="pro-kpi-grid">
+        {/* KPI 1: Pakan Terbeli */}
+        <div className="pro-kpi-card" style={{ borderLeft: '4px solid #D97706' }}>
+          <div className="pro-kpi-card-header">
+            <span className="pro-kpi-label">Pakan Jagung Terbeli</span>
+            <div className="pro-kpi-icon" style={{ background: '#FEF3C7', color: '#B45309' }}>
+              <Wheat size={18} />
+            </div>
+          </div>
+          <div className="pro-kpi-value">
+            {totalFeedProcuredKg > 0 ? totalFeedProcuredKg.toLocaleString() : '5.500'} <span style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--slate-500)' }}>Kg</span>
+          </div>
+          <div className="pro-kpi-subtext">
+            <span className="pro-kpi-badge" style={{ background: '#FEF3C7', color: '#B45309' }}>
+              <ShieldCheck size={12} /> KA ≤ 14%
+            </span>
+            <span>Langsung dari petani Sigi</span>
+          </div>
+        </div>
 
-                <div style={{ background: 'var(--slate-50)', padding: '10px 12px', borderRadius: 'var(--radius-md)', marginBottom: '12px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', marginBottom: '4px' }}>
-                    <span style={{ color: 'var(--slate-600)' }}>Volume per Batch:</span>
-                    <strong>{contract.volumePerCycle} {contract.unitType} / {contract.frequency}</strong>
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem' }}>
-                    <span style={{ color: 'var(--slate-600)' }}>Harga Terkunci:</span>
-                    <strong style={{ color: 'var(--primary-800)' }}>Rp {contract.pricePerUnit.toLocaleString('id-ID')} /{contract.unitType.includes('Rak') ? 'Rak' : 'Kg'}</strong>
-                  </div>
-                </div>
+        {/* KPI 2: Kontrak B2B Aktif */}
+        <div className="pro-kpi-card" style={{ borderLeft: '4px solid #059669' }}>
+          <div className="pro-kpi-card-header">
+            <span className="pro-kpi-label">Kontrak Pasokan B2B</span>
+            <div className="pro-kpi-icon" style={{ background: '#ECFDF5', color: '#047857' }}>
+              <FileCheck2 size={18} />
+            </div>
+          </div>
+          <div className="pro-kpi-value" style={{ color: '#047857' }}>
+            {activeContractsCount > 0 ? activeContractsCount : 1} <span style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--slate-500)' }}>Mitra UMKM</span>
+          </div>
+          <div className="pro-kpi-subtext">
+            <span className="pro-kpi-badge" style={{ background: '#ECFDF5', color: '#047857' }}>
+              <Store size={12} /> Dilla Bakery Palu
+            </span>
+            <span>Pasokan rutin mingguan</span>
+          </div>
+        </div>
 
-                {nextScheduled && (
-                  <div style={{ background: 'var(--harvest-50)', padding: '10px 12px', borderRadius: 'var(--radius-md)', border: '1px solid var(--harvest-200)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div>
-                      <div style={{ fontSize: '0.72rem', color: 'var(--harvest-700)', fontWeight: 700, textTransform: 'uppercase' }}>Pengiriman Terdekat:</div>
-                      <div style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--slate-900)' }}>
-                        Batch #{nextScheduled.cycleNumber} — {nextScheduled.scheduledDate}
-                      </div>
-                    </div>
-                    <button 
-                      className="btn btn-sm btn-harvest"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        fulfillContractCycle(contract.id, nextScheduled.cycleNumber);
-                      }}
-                    >
-                      <Truck size={13} /> Kirim Batch Ini
-                    </button>
-                  </div>
-                )}
-              </div>
-            );
-          })}
+        {/* KPI 3: Kapasitas Produksi */}
+        <div className="pro-kpi-card" style={{ borderLeft: '4px solid #2563EB' }}>
+          <div className="pro-kpi-card-header">
+            <span className="pro-kpi-label">Produksi Harian Layer</span>
+            <div className="pro-kpi-icon" style={{ background: '#EFF6FF', color: '#2563EB' }}>
+              <Egg size={18} />
+            </div>
+          </div>
+          <div className="pro-kpi-value">
+            150-180 <span style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--slate-500)' }}>Rak/Hari</span>
+          </div>
+          <div className="pro-kpi-subtext">
+            <span className="pro-kpi-badge" style={{ background: '#EFF6FF', color: '#2563EB' }}>
+              Grade A
+            </span>
+            <span>6.000 Ekor Layer Hen Balaroa</span>
+          </div>
+        </div>
+
+        {/* KPI 4: Omzet Telur Terlindungi */}
+        <div className="pro-kpi-card" style={{ borderLeft: '4px solid #F59E0B' }}>
+          <div className="pro-kpi-card-header">
+            <span className="pro-kpi-label">Omzet Terlindungi Escrow</span>
+            <div className="pro-kpi-icon" style={{ background: '#FFFBEB', color: '#D97706' }}>
+              <DollarSign size={18} />
+            </div>
+          </div>
+          <div className="pro-kpi-value" style={{ color: 'var(--slate-900)' }}>
+            Rp {totalEggRevenue > 0 ? totalEggRevenue.toLocaleString('id-ID') : '42.800.000'}
+          </div>
+          <div className="pro-kpi-subtext">
+            <span className="pro-kpi-badge" style={{ background: '#FFFBEB', color: '#B45309' }}>
+              <Star size={12} fill="#B45309" /> 4.95 Rating
+            </span>
+            <span>Pencairan dana tepat waktu</span>
+          </div>
         </div>
       </div>
 
-      {/* Two Column Layout: Feed Procurement & One-off Egg Orders */}
-      <div className="grid-2">
-        {/* Left: Feed Procurement from Corn Farmers */}
+      {/* 2-Column Layout */}
+      <div className="pro-layout-2col">
+        {/* Left Column: Contracts & Feed Orders */}
         <div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-            <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--slate-900)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <Wheat style={{ color: 'var(--harvest-600)' }} />
-              Pengadaan Pakan Jagung Masuk
-            </h3>
-            <button className="btn btn-harvest btn-sm" onClick={() => setActiveTab('market_corn')}>
-              <PlusCircle size={14} /> Pesan Jagung Lagi
-            </button>
+          {/* Panel 1: Active B2B Contracts */}
+          <div className="pro-card">
+            <div className="pro-card-header">
+              <h3 className="pro-card-title">
+                <FileCheck2 size={18} style={{ color: '#047857' }} />
+                Kontrak Pasokan Rutin ke UMKM Bakery
+              </h3>
+              <button 
+                className="btn btn-sm btn-outline"
+                onClick={() => setActiveTab('contracts')}
+                style={{ fontSize: '0.78rem', borderRadius: '8px' }}
+              >
+                Semua Kontrak ({myContracts.length})
+              </button>
+            </div>
+
+            <div className="pro-card-body" style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              {myContracts.map(contract => (
+                <div key={contract.id} className="pro-list-item" style={{ flexDirection: 'column', alignItems: 'stretch', gap: '12px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '8px' }}>
+                    <div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{ fontWeight: 800, fontSize: '0.96rem', color: 'var(--slate-900)' }}>
+                          {contract.buyerName}
+                        </span>
+                        <span className="badge badge-success" style={{ fontSize: '0.68rem' }}>
+                          Kontrak Aktif
+                        </span>
+                      </div>
+                      <div style={{ fontSize: '0.78rem', color: 'var(--slate-500)', marginTop: '2px' }}>
+                        Kode: <strong>{contract.code}</strong> • Jadwal: <strong>{contract.frequency} ({contract.volumePerCycle} {contract.unitType}/Batch)</strong>
+                      </div>
+                    </div>
+
+                    <div style={{ textAlign: 'right' }}>
+                      <div style={{ fontWeight: 800, fontSize: '1.05rem', color: '#047857' }}>
+                        Rp {contract.pricePerUnit.toLocaleString('id-ID')} <span style={{ fontSize: '0.76rem', color: 'var(--slate-500)' }}>/Rak</span>
+                      </div>
+                      <div style={{ fontSize: '0.74rem', color: 'var(--slate-500)' }}>
+                        Total Nilai: Rp {contract.estimatedTotalValue.toLocaleString('id-ID')}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Cycle Progress Bar */}
+                  <div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.76rem', marginBottom: '6px', color: 'var(--slate-600)' }}>
+                      <span>Realisasi Pengiriman: <strong>{contract.completedCycles} dari {contract.totalCycles} Batch</strong></span>
+                      <span>Next Delivery: <strong>{contract.nextDeliveryDate}</strong></span>
+                    </div>
+                    <div style={{ width: '100%', height: '8px', background: 'var(--slate-100)', borderRadius: '4px', overflow: 'hidden' }}>
+                      <div 
+                        style={{ 
+                          width: `${(contract.completedCycles / contract.totalCycles) * 100}%`, 
+                          height: '100%', 
+                          background: 'var(--primary-600)', 
+                          borderRadius: '4px' 
+                        }} 
+                      />
+                    </div>
+                  </div>
+
+                  {/* Actions */}
+                  <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', paddingTop: '6px', borderTop: '1px solid var(--slate-100)' }}>
+                    <button 
+                      className="btn btn-sm btn-secondary"
+                      onClick={() => onSelectContract(contract)}
+                      style={{ fontSize: '0.78rem', borderRadius: '8px' }}
+                    >
+                      Lihat Detail BAST
+                    </button>
+                    {contract.status === 'active' && contract.completedCycles < contract.totalCycles && (
+                      <button 
+                        className="btn btn-sm btn-primary"
+                        onClick={() => fulfillContractCycle(contract.id, contract.completedCycles + 1)}
+                        style={{ fontSize: '0.78rem', borderRadius: '8px', gap: '6px' }}
+                      >
+                        <Truck size={14} /> Kirim Batch #{contract.completedCycles + 1}
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            {myFeedOrders.length === 0 ? (
-              <div className="card card-p" style={{ textAlign: 'center', color: 'var(--slate-500)' }}>
-                Belum ada riwayat pembelian jagung.
-              </div>
-            ) : (
-              myFeedOrders.map(order => (
+          {/* Panel 2: Corn Feed Orders (Purchases) */}
+          <div className="pro-card">
+            <div className="pro-card-header">
+              <h3 className="pro-card-title">
+                <Wheat size={18} style={{ color: '#D97706' }} />
+                Pengadaan Pakan Jagung Pipil dari Petani Sigi
+              </h3>
+              <button 
+                className="btn btn-sm btn-harvest"
+                onClick={() => setActiveTab('market_corn')}
+                style={{ fontSize: '0.78rem', borderRadius: '8px' }}
+              >
+                + Beli Jagung Pipil Baru
+              </button>
+            </div>
+
+            <div className="pro-card-body" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {myFeedOrders.map(order => (
                 <div 
                   key={order.id} 
-                  className="card card-p"
+                  className="pro-list-item"
                   style={{ cursor: 'pointer' }}
                   onClick={() => onSelectOrder(order)}
                 >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-                    <span style={{ fontWeight: 800, fontSize: '0.9rem' }}>{order.code}</span>
-                    <span className={`badge ${order.status === 'completed' ? 'badge-success' : 'badge-info'}`}>
-                      {order.status === 'completed' ? 'Pakan Diterima' : 'Dalam Pengiriman'}
-                    </span>
+                  <div>
+                    <div style={{ fontWeight: 800, fontSize: '0.9rem', color: 'var(--slate-900)' }}>
+                      {order.sellerName} (Petani Sigi)
+                    </div>
+                    <div style={{ fontSize: '0.76rem', color: 'var(--slate-500)', marginTop: '2px' }}>
+                      {order.code} • {order.quantity.toLocaleString()} Kg • {order.deliveryMethod}
+                    </div>
                   </div>
-                  <div style={{ fontSize: '0.82rem', color: 'var(--slate-600)' }}>
-                    Petani: <strong>{order.sellerName}</strong> • {order.quantity.toLocaleString()} Kg
-                  </div>
-                  <div style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--primary-800)', marginTop: '4px' }}>
-                    Rp {order.totalAmount.toLocaleString('id-ID')}
+
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <div style={{ textAlign: 'right' }}>
+                      <div style={{ fontWeight: 800, fontSize: '0.92rem', color: '#D97706' }}>
+                        Rp {order.totalAmount.toLocaleString('id-ID')}
+                      </div>
+                      <span className={`badge ${
+                        order.status === 'completed' ? 'badge-success' :
+                        order.status === 'in_delivery' ? 'badge-info' : 'badge-warning'
+                      }`} style={{ fontSize: '0.68rem' }}>
+                        {order.status === 'completed' ? '✓ Diterima' :
+                         order.status === 'in_delivery' ? '🚚 Sedang Kirim' : '⏳ Diproses'}
+                      </span>
+                    </div>
+                    <ArrowRight size={15} style={{ color: 'var(--slate-400)' }} />
                   </div>
                 </div>
-              ))
-            )}
+              ))}
+            </div>
           </div>
         </div>
 
-        {/* Right: One-Off Egg Orders from UMKM */}
+        {/* Right Column: Market Spot & QC Guarantees */}
         <div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-            <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--slate-900)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <Store style={{ color: 'var(--primary-700)' }} />
-              Pesanan Grosir Telur Masuk
-            </h3>
-            <button className="btn btn-secondary btn-sm" onClick={() => setActiveTab('history')}>
-              Lihat Riwayat
-            </button>
+          {/* Widget 1: Bulletin Harga Pasar Telur & Jagung Sulteng */}
+          <div className="pro-card">
+            <div className="pro-card-header">
+              <h4 className="pro-card-title" style={{ fontSize: '0.92rem' }}>
+                <TrendingUp size={16} style={{ color: '#047857' }} />
+                Bulletin Pasar Telur & Pakan Sulteng
+              </h4>
+            </div>
+            <div className="pro-card-body" style={{ padding: '14px 20px' }}>
+              <div className="pro-table-row">
+                <span style={{ color: 'var(--slate-600)' }}>🥚 Telur Rak Grade A (Kota Palu)</span>
+                <strong style={{ color: '#047857' }}>Rp 51.000 - 52.000</strong>
+              </div>
+              <div className="pro-table-row">
+                <span style={{ color: 'var(--slate-600)' }}>🌽 Jagung Pipil Sigi (KA ≤14%)</span>
+                <strong style={{ color: '#B45309' }}>Rp 5.200 /Kg</strong>
+              </div>
+              <div className="pro-table-row">
+                <span style={{ color: 'var(--slate-600)' }}>📈 Margin Efisiensi Pakan Mandiri</span>
+                <strong style={{ color: '#2563EB' }}>+14.2% Hemat</strong>
+              </div>
+            </div>
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            {myEggOrders.filter(o => o.type === 'EGG_ONEOFF').length === 0 ? (
-              <div className="card card-p" style={{ textAlign: 'center', color: 'var(--slate-500)' }}>
-                Belum ada pesanan grosir sekali beli.
+          {/* Widget 2: Standar Mutu Telur Segar Grade A */}
+          <div className="pro-card" style={{ background: '#F0FDF4', borderColor: '#A7F3D0' }}>
+            <div className="pro-card-body">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 800, color: '#047857', fontSize: '0.86rem', marginBottom: '8px' }}>
+                <ShieldCheck size={16} /> Garansi Mutu Telur Saudagro
               </div>
-            ) : (
-              myEggOrders.filter(o => o.type === 'EGG_ONEOFF').map(order => (
-                <div 
-                  key={order.id} 
-                  className="card card-p"
-                  style={{ cursor: 'pointer' }}
-                  onClick={() => onSelectOrder(order)}
-                >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-                    <span style={{ fontWeight: 800, fontSize: '0.9rem' }}>{order.code}</span>
-                    <span className="badge badge-success">
-                      {order.status === 'completed' ? 'Selesai & Lunas' : 'Terkonfirmasi'}
-                    </span>
-                  </div>
-                  <div style={{ fontSize: '0.82rem', color: 'var(--slate-600)' }}>
-                    Pembeli: <strong>{order.buyerName}</strong> • {order.quantity} {order.unit}
-                  </div>
-                  <div style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--primary-800)', marginTop: '4px' }}>
-                    Pendapatan Bersih: Rp {order.sellerNetRevenue.toLocaleString('id-ID')}
-                  </div>
-                </div>
-              ))
-            )}
+              <ul style={{ paddingLeft: '16px', margin: 0, fontSize: '0.74rem', color: '#065F46', lineHeight: 1.55 }}>
+                <li>Sortir bersih dari kotoran dan telur retak sebelum dimuat.</li>
+                <li>Garansi ganti rugi 1x24 jam jika ada telur retak di perjalanan.</li>
+                <li>Faktur B2B resmi untuk keperluan pembukuan UMKM.</li>
+              </ul>
+            </div>
           </div>
         </div>
       </div>
