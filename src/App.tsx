@@ -12,6 +12,7 @@ import { UMKMDashboard } from './components/UMKMDashboard';
 import { AdminDashboard } from './components/AdminDashboard';
 import { B2BContractsView } from './components/B2BContractsView';
 import { TransactionHistoryView } from './components/TransactionHistoryView';
+import { ProfilePage } from './components/ProfilePage';
 import { OrderDetailsModal } from './components/OrderDetailsModal';
 import { ContractDetailsModal } from './components/ContractDetailsModal';
 import { AssistedRegisterModal } from './components/AssistedRegisterModal';
@@ -99,6 +100,10 @@ const MainApp: React.FC = () => {
 
           {activeTab === 'history' && (
             <TransactionHistoryView onSelectOrder={setSelectedOrder} />
+          )}
+
+          {activeTab === 'profile' && (
+            <ProfilePage />
           )}
         </main>
       </div>

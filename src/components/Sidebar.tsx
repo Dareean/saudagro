@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useApp } from '../context/AppContext';
 import { 
   LayoutDashboard, 
@@ -9,11 +9,9 @@ import {
   ShieldCheck, 
   HelpCircle, 
   LogOut, 
-  RefreshCw, 
-  ChevronDown, 
-  Store,
-  X,
-  ExternalLink
+  User, 
+  ChevronRight,
+  X 
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -33,12 +31,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
     currentUser, 
     activeTab, 
     setActiveTab, 
-    switchUser, 
-    activeUserKey, 
     logout 
   } = useApp();
-
-  const [showRoleDropdown, setShowRoleDropdown] = useState(false);
 
   const getRoleLabel = () => {
     switch (currentUser.role) {
@@ -50,33 +44,44 @@ export const Sidebar: React.FC<SidebarProps> = ({
     }
   };
 
-  const navLinks = [
-    {
-      id: 'dashboard',
-      label: 'Ringkasan',
-      icon: LayoutDashboard,
-    },
-    {
-      id: 'market_corn',
-      label: 'Pasar Jagung Pipil',
-      icon: Wheat,
-    },
-    {
-      id: 'market_eggs',
-      label: 'Pasar Telur Ayam',
-      icon: Egg,
-    },
-    {
-      id: 'contracts',
-      label: 'Kontrak Pasokan B2B',
-      icon: FileCheck2,
-    },
-    {
-      id: 'history',
-      label: 'Riwayat Transaksi',
-      icon: FileText,
+  const getNavLinks = () => {
+    switch (currentUser.role) {
+      case 'CORN_FARMER':
+        return [
+          { id: 'dashboard', label: 'Silo & Panen Jagung', icon: LayoutDashboard },
+          { id: 'market_corn', label: 'Jual Jagung Pipil', icon: Wheat },
+          { id: 'market_eggs', label: 'Info Acuan Telur', icon: Egg },
+          { id: 'history', label: 'Riwayat Penjualan', icon: FileText }
+        ];
+      case 'EGG_FARMER':
+        return [
+          { id: 'dashboard', label: 'Dual-Hub Pakan & Telur', icon: LayoutDashboard },
+          { id: 'market_corn', label: 'Beli Pakan Jagung Sigi', icon: Wheat },
+          { id: 'market_eggs', label: 'Jual Pasokan Telur', icon: Egg },
+          { id: 'contracts', label: 'Kontrak Pasokan B2B', icon: FileCheck2 },
+          { id: 'history', label: 'Riwayat Transaksi', icon: FileText }
+        ];
+      case 'UMKM_BUYER':
+        return [
+          { id: 'dashboard', label: 'Pengadaan & QC Telur', icon: LayoutDashboard },
+          { id: 'market_eggs', label: 'Pengadaan Pasokan Telur', icon: Egg },
+          { id: 'contracts', label: 'Jadwal Kontrak Langganan', icon: FileCheck2 },
+          { id: 'history', label: 'Riwayat Faktur BAST', icon: FileText }
+        ];
+      case 'ADMIN':
+      default:
+        return [
+          { id: 'dashboard', label: 'Control Tower Pasigala', icon: LayoutDashboard },
+          { id: 'market_corn', label: 'Katalog Pasar Jagung', icon: Wheat },
+          { id: 'market_eggs', label: 'Katalog Pasar Telur', icon: Egg },
+          { id: 'contracts', label: 'Kliring Kontrak B2B', icon: FileCheck2 },
+          { id: 'history', label: 'Semua Log Transaksi', icon: FileText }
+        ];
     }
-  ];
+  };
+
+  const navLinks = getNavLinks();
+
 
   return (
     <>
@@ -190,9 +195,32 @@ export const Sidebar: React.FC<SidebarProps> = ({
           )}
         </nav>
 
-        {/* User Profile & Role Switcher at Bottom */}
-        <div style={{ padding: '14px 16px', borderTop: '1px solid var(--border-subtle)', background: 'var(--slate-50)', position: 'relative' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        {/* User Profile Card at Bottom - Navigates directly to Profile Page */}
+        <div style={{ padding: '14px 16px', borderTop: '1px solid var(--border-subtle)', background: 'var(--slate-50)' }}>
+          <div 
+            onClick={() => {
+              setActiveTab('profile');
+              if (onCloseMobile) onCloseMobile();
+            }}
+            style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'space-between',
+              padding: '8px 10px',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              background: activeTab === 'profile' ? '#FFFFFF' : 'transparent',
+              border: activeTab === 'profile' ? '1px solid var(--border-subtle)' : '1px solid transparent',
+              boxShadow: activeTab === 'profile' ? '0 1px 3px rgba(0,0,0,0.05)' : 'none',
+              transition: 'all 0.15s ease'
+            }}
+            onMouseEnter={e => {
+              if (activeTab !== 'profile') (e.currentTarget.style.background = '#FFFFFF');
+            }}
+            onMouseLeave={e => {
+              if (activeTab !== 'profile') (e.currentTarget.style.background = 'transparent');
+            }}
+          >
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
               <img 
                 src={currentUser.avatar} 
@@ -209,62 +237,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
               </div>
             </div>
 
-            <button
-              type="button"
-              onClick={() => setShowRoleDropdown(!showRoleDropdown)}
-              style={{ background: 'none', border: 'none', color: 'var(--slate-400)', cursor: 'pointer', padding: '4px' }}
-              title="Ganti persona demo"
-            >
-              <ChevronDown size={15} />
-            </button>
+            <ChevronRight size={15} style={{ color: activeTab === 'profile' ? 'var(--primary-700)' : 'var(--slate-400)', flexShrink: 0 }} />
           </div>
-
-          {/* Quick Role Switcher Dropdown */}
-          {showRoleDropdown && (
-            <div style={{
-              position: 'absolute',
-              bottom: '100%',
-              left: '12px',
-              right: '12px',
-              marginBottom: '6px',
-              background: 'white',
-              borderRadius: '10px',
-              border: '1px solid var(--border-subtle)',
-              boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
-              padding: '6px',
-              zIndex: 100
-            }}>
-              <div style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--slate-400)', padding: '4px 8px', textTransform: 'uppercase' }}>
-                Beralih Persona Demo:
-              </div>
-              {[
-                { key: 'pak_jufri', label: 'Pak Jufri (Petani Jagung Sigi)' },
-                { key: 'bu_rahma', label: 'Bu Rahma (Peternak Ayam Palu)' },
-                { key: 'kak_dilla', label: 'Kak Dilla (UMKM Bakery Palu)' },
-                { key: 'admin_saudagro', label: 'Admin Mediasi Sulteng' }
-              ].map(p => (
-                <div
-                  key={p.key}
-                  onClick={() => {
-                    switchUser(p.key as any);
-                    setShowRoleDropdown(false);
-                    if (onCloseMobile) onCloseMobile();
-                  }}
-                  style={{
-                    padding: '7px 8px',
-                    borderRadius: '6px',
-                    fontSize: '0.76rem',
-                    fontWeight: activeUserKey === p.key ? 700 : 500,
-                    background: activeUserKey === p.key ? '#ECFDF5' : 'transparent',
-                    color: activeUserKey === p.key ? '#047857' : 'var(--slate-700)',
-                    cursor: 'pointer'
-                  }}
-                >
-                  {p.label}
-                </div>
-              ))}
-            </div>
-          )}
 
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '10px', paddingTop: '8px', borderTop: '1px solid var(--border-subtle)' }}>
             <span style={{ fontSize: '0.7rem', color: '#047857', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}>

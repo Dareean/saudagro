@@ -144,89 +144,114 @@ export const MarketplaceCorn: React.FC = () => {
   };
 
   return (
-    <div className="main-wrapper" ref={containerRef}>
+    <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '28px 24px 60px 24px' }} ref={containerRef}>
       {/* Clean Page Hero */}
-      <div className="page-hero">
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px', marginBottom: '20px' }}>
         <div>
-          <h1 className="page-title">
-            Pasar Pakan Jagung Petani ke Peternak
+          <h1 style={{ fontSize: '1.45rem', fontWeight: 800, color: 'var(--slate-900)', letterSpacing: '-0.02em', margin: 0 }}>
+            Pasar Jagung Pipil Kering Sigi & Donggala
           </h1>
-          <p className="page-subtitle">
-            Pasokan langsung dari petani jagung Sigi, Palu, dan Donggala ke peternak ayam tanpa tengkulak.
+          <p style={{ fontSize: '0.84rem', color: 'var(--slate-500)', marginTop: '4px', margin: 0 }}>
+            {currentUser.role === 'EGG_FARMER' 
+              ? 'Pengadaan pakan jagung pipil langsung dari petani Sigi untuk ransum mandiri peternakan ayam Anda (KA ≤ 14%).'
+              : currentUser.role === 'CORN_FARMER'
+              ? 'Katalog penjualan jagung panen petani Sigi langsung ke peternak layer tanpa perantara tengkulak.'
+              : 'Informasi komoditas jagung pipil kering wilayah Sigi, Palu, dan Donggala.'}
           </p>
         </div>
 
         <div>
-          <button 
-            className="btn btn-harvest" 
-            onClick={() => setShowCreateModal(true)}
-          >
-            <PlusCircle size={16} />
-            Pasang Stok Panen
-          </button>
+          {(currentUser.role === 'CORN_FARMER' || currentUser.role === 'ADMIN') && (
+            <button 
+              className="btn btn-primary" 
+              onClick={() => setShowCreateModal(true)}
+              style={{ padding: '8px 16px', fontSize: '0.82rem', fontWeight: 700, borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}
+            >
+              <PlusCircle size={16} />
+              Pasang Stok Panen Jagung
+            </button>
+          )}
+
+          {currentUser.role === 'EGG_FARMER' && (
+            <div style={{ background: '#ECFDF5', border: '1px solid #A7F3D0', padding: '6px 14px', borderRadius: '8px', fontSize: '0.76rem', color: '#047857', fontWeight: 700 }}>
+              Mode Pembeli Pakan Ternak • Pilih Petani Sigi di Bawah
+            </div>
+          )}
         </div>
       </div>
+
 
       {/* Filter Bar */}
-      <div className="filter-bar">
-        <div className="filter-grid">
-          <div style={{ position: 'relative' }}>
-            <Search size={15} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-light)' }} />
-            <input 
-              type="text" 
-              className="form-input" 
-              placeholder="Cari petani, desa, atau pakan..." 
-              style={{ paddingLeft: '34px' }}
-              value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
-            />
-          </div>
+      <div style={{
+        background: '#FFFFFF',
+        border: '1px solid var(--border-subtle)',
+        borderRadius: '12px',
+        padding: '12px 16px',
+        marginBottom: '20px',
+        display: 'flex',
+        flexWrap: 'wrap',
+        gap: '12px',
+        alignItems: 'center'
+      }}>
+        <div style={{ position: 'relative', flex: '1 1 240px' }}>
+          <Search size={15} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--slate-400)' }} />
+          <input 
+            type="text" 
+            className="form-input" 
+            placeholder="Cari petani, desa, atau pakan..." 
+            style={{ width: '100%', paddingLeft: '34px', paddingRight: '12px', paddingTop: '7px', paddingBottom: '7px', fontSize: '0.82rem', borderRadius: '8px', border: '1px solid var(--border-subtle)', boxSizing: 'border-box' }}
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+          />
+        </div>
 
-          <div>
-            <select 
-              className="form-select" 
-              value={selectedDistrict} 
-              onChange={e => setSelectedDistrict(e.target.value)}
-            >
-              <option value="all">Semua Wilayah</option>
-              <option value="Kabupaten Sigi">Kabupaten Sigi</option>
-              <option value="Kota Palu">Kota Palu</option>
-              <option value="Kabupaten Donggala">Kabupaten Donggala</option>
-            </select>
-          </div>
+        <div style={{ flex: '0 1 180px' }}>
+          <select 
+            className="form-select" 
+            value={selectedDistrict} 
+            onChange={e => setSelectedDistrict(e.target.value)}
+            style={{ width: '100%', padding: '7px 12px', fontSize: '0.82rem', borderRadius: '8px', border: '1px solid var(--border-subtle)' }}
+          >
+            <option value="all">Semua Wilayah</option>
+            <option value="Kabupaten Sigi">Kabupaten Sigi</option>
+            <option value="Kota Palu">Kota Palu</option>
+            <option value="Kabupaten Donggala">Kabupaten Donggala</option>
+          </select>
+        </div>
 
-          <div>
-            <select 
-              className="form-select" 
-              value={selectedMoisture} 
-              onChange={e => setSelectedMoisture(e.target.value)}
-            >
-              <option value="all">Semua Kadar Air</option>
-              <option value="standard">Kadar Air Aman (≤ 14%)</option>
-              <option value="above">Kadar Air &gt; 14%</option>
-            </select>
-          </div>
+        <div style={{ flex: '0 1 180px' }}>
+          <select 
+            className="form-select" 
+            value={selectedMoisture} 
+            onChange={e => setSelectedMoisture(e.target.value)}
+            style={{ width: '100%', padding: '7px 12px', fontSize: '0.82rem', borderRadius: '8px', border: '1px solid var(--border-subtle)' }}
+          >
+            <option value="all">Semua Kadar Air</option>
+            <option value="standard">Kadar Air Aman (≤ 14%)</option>
+            <option value="above">Kadar Air &gt; 14%</option>
+          </select>
+        </div>
 
-          <div>
-            <select 
-              className="form-select" 
-              value={selectedForm} 
-              onChange={e => setSelectedForm(e.target.value)}
-            >
-              <option value="all">Semua Bentuk Jagung</option>
-              <option value="Pipil Kering">Pipil Kering (Siap Giling)</option>
-              <option value="Tongkol Kering">Tongkol Kering</option>
-            </select>
-          </div>
+        <div style={{ flex: '0 1 180px' }}>
+          <select 
+            className="form-select" 
+            value={selectedForm} 
+            onChange={e => setSelectedForm(e.target.value)}
+            style={{ width: '100%', padding: '7px 12px', fontSize: '0.82rem', borderRadius: '8px', border: '1px solid var(--border-subtle)' }}
+          >
+            <option value="all">Semua Bentuk Jagung</option>
+            <option value="Pipil Kering">Pipil Kering (Siap Giling)</option>
+            <option value="Tongkol Kering">Tongkol Kering</option>
+          </select>
         </div>
       </div>
 
-      {/* Clean Organic Cards Grid */}
-      <div className="grid-3">
+      {/* Clean Organic Cards Grid - Compact & Responsive */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '16px' }}>
         {filteredListings.map(item => {
           const isStandardFeed = item.moistureLevel <= 14.0;
           return (
-            <div key={item.id} className="card corn-card-item">
+            <div key={item.id} className="card corn-card-item" style={{ borderRadius: '12px', overflow: 'hidden', border: '1px solid var(--border-subtle)' }}>
               <div className="card-img-wrapper">
                 <img 
                   src={item.images[0]} 
@@ -234,21 +259,21 @@ export const MarketplaceCorn: React.FC = () => {
                   className="card-img"
                 />
                 <div className="card-img-tags">
-                  <span className="badge badge-info" style={{ background: 'rgba(27, 56, 26, 0.85)', color: 'white', border: 'none' }}>
+                  <span className="badge" style={{ background: 'rgba(15, 23, 42, 0.85)', color: '#FFFFFF', fontSize: '0.68rem', fontWeight: 700 }}>
                     {item.code}
                   </span>
                   {isStandardFeed ? (
-                    <span className="badge badge-success">
-                      <Droplets size={11} /> KA {item.moistureLevel}% (Pakan Aman)
+                    <span className="badge badge-success" style={{ fontSize: '0.68rem', fontWeight: 700 }}>
+                      <Droplets size={10} /> KA {item.moistureLevel}% (Aman)
                     </span>
                   ) : (
-                    <span className="badge badge-warning">
-                      <Droplets size={11} /> KA {item.moistureLevel}% (Perlu Jemur)
+                    <span className="badge badge-warning" style={{ fontSize: '0.68rem', fontWeight: 700 }}>
+                      <Droplets size={10} /> KA {item.moistureLevel}% (Perlu Jemur)
                     </span>
                   )}
                 </div>
-                <div style={{ position: 'absolute', bottom: '8px', right: '8px' }}>
-                  <span className="badge" style={{ background: 'rgba(255,255,255,0.92)', color: 'var(--forest-900)' }}>
+                <div style={{ position: 'absolute', bottom: '6px', right: '6px' }}>
+                  <span className="badge" style={{ background: 'rgba(255,255,255,0.92)', color: 'var(--slate-800)', fontSize: '0.68rem', fontWeight: 700 }}>
                     {item.cornForm}
                   </span>
                 </div>
@@ -259,7 +284,7 @@ export const MarketplaceCorn: React.FC = () => {
                   <div className="card-farmer-info">
                     <div className="card-farmer-name">
                       {item.farmerName}
-                      <span title="Petani Terverifikasi"><ShieldCheck size={15} style={{ color: '#2563eb' }} /></span>
+                      <span title="Petani Terverifikasi"><ShieldCheck size={14} style={{ color: '#047857' }} /></span>
                     </div>
                   </div>
 
@@ -272,12 +297,12 @@ export const MarketplaceCorn: React.FC = () => {
                   </p>
 
                   <div className="card-data-box">
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '3px' }}>
-                      <span style={{ color: 'var(--text-muted)' }}>Stok Siap Kirim:</span>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2px' }}>
+                      <span style={{ color: 'var(--slate-500)' }}>Stok Siap Kirim:</span>
                       <strong>{item.remainingKg.toLocaleString()} Kg ({ (item.remainingKg / 1000).toFixed(1) } Ton)</strong>
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                      <span style={{ color: 'var(--text-muted)' }}>Panen Pada:</span>
+                      <span style={{ color: 'var(--slate-500)' }}>Panen Pada:</span>
                       <span>{item.harvestDate}</span>
                     </div>
                   </div>
@@ -285,16 +310,16 @@ export const MarketplaceCorn: React.FC = () => {
 
                 <div>
                   <div className="card-price-row">
-                    <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Harga Satuan:</span>
+                    <span style={{ fontSize: '0.74rem', color: 'var(--slate-500)' }}>Harga Satuan:</span>
                     <span className="card-price-value">
                       Rp {item.pricePerKg.toLocaleString('id-ID')}
-                      <span style={{ fontSize: '0.78rem', fontWeight: 500, color: 'var(--text-muted)' }}> /kg</span>
+                      <span style={{ fontSize: '0.72rem', fontWeight: 500, color: 'var(--slate-500)' }}> /kg</span>
                     </span>
                   </div>
 
                   <div style={{ display: 'flex', gap: '8px' }}>
                     <button 
-                      className="btn btn-secondary btn-sm"
+                      className="btn btn-wa btn-sm"
                       onClick={() => {
                         setWaModalData({
                           isOpen: true,
@@ -304,10 +329,12 @@ export const MarketplaceCorn: React.FC = () => {
                           actionTitle: 'Tanya Petani via WhatsApp'
                         });
                       }}
-                      title="Hubungi Petani"
-                      style={{ padding: '8px 12px' }}
+                      title="Hubungi Petani via WhatsApp"
+                      style={{ padding: '6px 10px', borderRadius: '7px' }}
                     >
-                      <MessageSquare size={15} style={{ color: 'var(--wa-dark)' }} />
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.312.045-.634.079-1.85-.426-1.505-.625-2.476-2.15-2.551-2.25-.074-.1-1.17-1.558-1.17-2.971 0-1.413.738-2.108 1.002-2.397.264-.289.576-.361.768-.361.192 0 .384.002.552.01.178.009.418-.068.653.498.24.577.817 1.996.889 2.14.072.145.12.313.024.505-.096.192-.144.312-.288.481-.144.168-.303.376-.433.504-.144.145-.295.302-.127.591.168.289.747 1.232 1.604 1.995 1.102.981 2.032 1.285 2.32 1.43.289.144.457.12.625-.073.168-.192.72-.842.912-1.13.192-.289.384-.24.649-.144.264.096 1.681.793 1.969.937.288.145.48.217.552.337.072.12.072.72-.072 1.125zM12 2C6.477 2 2 6.477 2 12c0 1.89.525 3.66 1.438 5.168L2 22l4.975-1.399A9.957 9.957 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2zm0 18.2c-1.63 0-3.15-.44-4.46-1.22l-.32-.19-2.96.83.82-2.88-.21-.34A8.16 8.16 0 013.8 12c0-4.52 3.68-8.2 8.2-8.2s8.2 3.68 8.2 8.2-3.68 8.2-8.2 8.2z" />
+                      </svg>
                     </button>
                     
                     <button 
@@ -318,9 +345,10 @@ export const MarketplaceCorn: React.FC = () => {
                         setOrderQuantityKg(Math.min(1000, item.remainingKg));
                         setOfferedPrice(item.pricePerKg);
                       }}
+                      style={{ padding: '6px 12px', fontSize: '0.78rem', borderRadius: '7px', fontWeight: 700 }}
                     >
                       {item.remainingKg <= 0 ? 'Stok Habis' : 'Pesan Jagung Pakan'}
-                      <ArrowRight size={15} />
+                      <ArrowRight size={14} />
                     </button>
                   </div>
                 </div>
@@ -333,14 +361,18 @@ export const MarketplaceCorn: React.FC = () => {
       {/* Order Modal */}
       {orderingListing && (
         <div className="modal-overlay" onClick={() => setOrderingListing(null)}>
-          <div className="modal-card" onClick={e => e.stopPropagation()}>
+          <div 
+            className="modal-card" 
+            onClick={e => e.stopPropagation()}
+            style={{ maxWidth: '580px', padding: '24px 28px', maxHeight: '92vh', overflowY: 'auto' }}
+          >
             <div className="modal-header">
               <div>
-                <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--forest-900)' }}>
-                  Pesan Pakan Jagung
+                <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--slate-900)', margin: 0 }}>
+                  Pesan Pakan Jagung — {orderingListing.farmerName}
                 </h3>
-                <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                  Kode: {orderingListing.code} • {orderingListing.farmerName}
+                <p style={{ fontSize: '0.8rem', color: 'var(--slate-500)', margin: '4px 0 0 0' }}>
+                  {orderingListing.code} • {orderingListing.village}, {orderingListing.district} (KA {orderingListing.moistureLevel}%)
                 </p>
               </div>
               <button className="modal-close-btn" onClick={() => setOrderingListing(null)}>
@@ -361,37 +393,36 @@ export const MarketplaceCorn: React.FC = () => {
                   onChange={e => setOrderQuantityKg(Number(e.target.value))}
                   required
                 />
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.76rem', color: 'var(--text-muted)', marginTop: '3px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.74rem', color: 'var(--slate-500)', marginTop: '4px' }}>
                   <span>Min order: 50 Kg</span>
-                  <span>Tersedia: {orderingListing.remainingKg.toLocaleString()} Kg</span>
+                  <span>Tersedia: <strong>{orderingListing.remainingKg.toLocaleString()} Kg</strong></span>
                 </div>
               </div>
 
               {/* Price Negotiation (REQ-10) */}
-              <div style={{ background: 'var(--amber-soft)', padding: '10px 14px', borderRadius: 'var(--radius-md)', border: '1px solid var(--amber-border)', marginBottom: '14px' }}>
-                <label style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--amber-dark)', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}>
+              <div style={{ background: '#FFFBEB', padding: '12px 14px', borderRadius: '10px', border: '1px solid #FDE68A', marginBottom: '14px' }}>
+                <label style={{ fontSize: '0.8rem', fontWeight: 700, color: '#92400E', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
                   <input 
                     type="checkbox" 
                     checked={enableNego} 
                     onChange={e => setEnableNego(e.target.checked)} 
+                    style={{ accentColor: '#D97706' }}
                   />
                   Ajukan Penawaran Harga Khusus (Nego)
                 </label>
 
                 {enableNego && (
-                  <div style={{ marginTop: '8px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <span style={{ fontSize: '0.85rem', fontWeight: 700 }}>Tawaran: Rp</span>
-                      <input 
-                        type="number" 
-                        className="form-input" 
-                        step={50}
-                        value={offeredPrice} 
-                        onChange={e => setOfferedPrice(Number(e.target.value))}
-                        style={{ width: '130px', padding: '6px 10px' }}
-                      />
-                      <span style={{ fontSize: '0.8rem' }}>/Kg</span>
-                    </div>
+                  <div style={{ marginTop: '10px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#92400E' }}>Tawaran: Rp</span>
+                    <input 
+                      type="number" 
+                      className="form-input" 
+                      step={50}
+                      value={offeredPrice} 
+                      onChange={e => setOfferedPrice(Number(e.target.value))}
+                      style={{ width: '130px', padding: '6px 10px', fontSize: '0.84rem' }}
+                    />
+                    <span style={{ fontSize: '0.8rem', color: '#92400E' }}>/Kg</span>
                   </div>
                 )}
               </div>
@@ -431,35 +462,35 @@ export const MarketplaceCorn: React.FC = () => {
 
                 return (
                   <div className="fee-calc-box">
-                    <div style={{ fontSize: '0.78rem', fontWeight: 800, color: 'var(--forest-900)', marginBottom: '6px' }}>
+                    <div style={{ fontSize: '0.82rem', fontWeight: 800, color: 'var(--slate-900)', marginBottom: '8px' }}>
                       Rincian Biaya & Transparansi Komisi (3%):
                     </div>
                     <div className="fee-row">
                       <span>Harga Jagung ({orderQuantityKg.toLocaleString()} Kg x Rp {effectivePrice.toLocaleString('id-ID')}):</span>
-                      <span style={{ fontWeight: 600 }}>Rp {subtotal.toLocaleString('id-ID')}</span>
+                      <span style={{ fontWeight: 700, color: 'var(--slate-900)' }}>Rp {subtotal.toLocaleString('id-ID')}</span>
                     </div>
                     <div className="fee-row">
                       <span>Ongkos Kirim ({deliveryMethod}):</span>
-                      <span style={{ fontWeight: 600 }}>Rp {deliveryFee.toLocaleString('id-ID')}</span>
+                      <span style={{ fontWeight: 700, color: 'var(--slate-900)' }}>Rp {deliveryFee.toLocaleString('id-ID')}</span>
                     </div>
-                    <div className="fee-row" style={{ color: 'var(--text-light)', fontSize: '0.76rem' }}>
-                      <span>*Komisi Platform 3% (dipotong dari penjual):</span>
+                    <div className="fee-row" style={{ color: 'var(--slate-500)', fontSize: '0.74rem' }}>
+                      <span>*Komisi Platform 3% (dipotong dari escrow penjual):</span>
                       <span>(Rp {commissionFee.toLocaleString('id-ID')})</span>
                     </div>
                     <div className="fee-row total">
                       <span>Total Pembayaran:</span>
-                      <span style={{ color: 'var(--forest-900)' }}>Rp {total.toLocaleString('id-ID')}</span>
+                      <span style={{ color: '#047857' }}>Rp {total.toLocaleString('id-ID')}</span>
                     </div>
                   </div>
                 );
               })()}
 
-              <div style={{ display: 'flex', gap: '8px', marginTop: '16px' }}>
-                <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={() => setOrderingListing(null)}>
+              <div style={{ display: 'flex', gap: '10px', marginTop: '16px', paddingTop: '14px', borderTop: '1px solid var(--border-subtle)' }}>
+                <button type="button" className="btn btn-secondary" style={{ flex: 1, padding: '10px', fontSize: '0.84rem' }} onClick={() => setOrderingListing(null)}>
                   Batal
                 </button>
-                <button type="submit" className="btn btn-primary" style={{ flex: 2 }}>
-                  <CheckCircle2 size={16} /> Ajukan Pesanan
+                <button type="submit" className="btn btn-primary" style={{ flex: 2, padding: '10px', fontSize: '0.84rem', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                  <CheckCircle2 size={16} /> Ajukan Pesanan Pakan
                 </button>
               </div>
             </form>
