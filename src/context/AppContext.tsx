@@ -170,7 +170,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     return saved ? JSON.parse(saved) : false;
   });
 
-  const [activeTab, setActiveTab] = useState<string>('market_corn');
+  const [activeTab, setActiveTab] = useState<string>('dashboard');
 
   const [cornListings, setCornListings] = useState<CornListing[]>(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.CORN_LISTINGS);

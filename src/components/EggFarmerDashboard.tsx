@@ -1,26 +1,19 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useApp } from '../context/AppContext';
 import { 
   Egg, 
   Wheat, 
-  FileCheck2, 
   Truck, 
-  ArrowRight, 
-  PlusCircle, 
+  Plus, 
   Clock, 
-  CheckCircle2, 
-  ShieldCheck, 
-  Star,
-  Package,
-  Layers,
-  Store,
-  TrendingUp,
-  DollarSign,
-  AlertCircle,
+  Check, 
+  FileText,
   Phone,
-  Calendar
+  Store,
+  ExternalLink
 } from 'lucide-react';
 import { TransactionOrder, B2BContract } from '../types';
+import { AnimatedTrendChart } from './AnimatedTrendChart';
 
 interface EggFarmerDashboardProps {
   onSelectOrder: (order: TransactionOrder) => void;
@@ -55,315 +48,298 @@ export const EggFarmerDashboard: React.FC<EggFarmerDashboardProps> = ({
     .reduce((acc, o) => acc + o.sellerNetRevenue, 0) +
     myContracts.reduce((acc, c) => acc + (c.completedCycles * c.volumePerCycle * c.pricePerUnit * 0.95), 0);
 
+  const eggProductionTrend = [
+    { label: 'Sen', dateStr: 'Senin, 22 Sep', value: 165, secondaryValue: 780 },
+    { label: 'Sel', dateStr: 'Selasa, 23 Sep', value: 172, secondaryValue: 800 },
+    { label: 'Rab', dateStr: 'Rabu, 24 Sep', value: 168, secondaryValue: 790 },
+    { label: 'Kam', dateStr: 'Kamis, 25 Sep', value: 175, secondaryValue: 820 },
+    { label: 'Jum', dateStr: 'Jumat, 26 Sep', value: 180, secondaryValue: 830 },
+    { label: 'Sab', dateStr: 'Sabtu, 27 Sep', value: 178, secondaryValue: 810 },
+    { label: 'Hari Ini', dateStr: 'Hari Ini (Balaroa)', value: 182, secondaryValue: 840 },
+  ];
+
   return (
-    <div className="pro-dashboard-wrapper">
-      {/* Header Bar */}
-      <div className="pro-dashboard-header">
+    <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '28px 24px 60px 24px' }}>
+      {/* Top Header & Actions */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px', marginBottom: '24px' }}>
         <div>
-          <div className="pro-breadcrumb">
-            <span>Beranda</span>
-            <span>/</span>
-            <span className="active">Dashboard Peternak Ayam</span>
-          </div>
-          <h1 className="pro-dashboard-title">
-            <div style={{ 
-              width: '36px', 
-              height: '36px', 
-              borderRadius: '10px', 
-              background: '#ECFDF5', 
-              color: '#047857', 
-              display: 'inline-flex', 
-              alignItems: 'center', 
-              justifyContent: 'center' 
-            }}>
-              <Egg size={20} />
-            </div>
-            Dashboard Rantai Pasok Pakan & Penjualan Telur
+          <h1 style={{ fontSize: '1.45rem', fontWeight: 800, color: 'var(--slate-900)', letterSpacing: '-0.02em', margin: 0 }}>
+            Ringkasan Rantai Pasok Pakan & Penjualan Telur
           </h1>
-          <p className="pro-dashboard-subtitle">
-            Pusat integrasi ganda: Pengadaan pakan jagung langsung dari petani Sigi & Penjualan pasokan telur kontrak B2B ke UMKM Palu.
+          <p style={{ fontSize: '0.84rem', color: 'var(--slate-500)', marginTop: '4px', margin: 0 }}>
+            {currentUser.name} • {currentUser.village}, {currentUser.district} (6.000 Layer Hen)
           </p>
         </div>
 
-        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: '10px' }}>
           <button 
-            className="btn btn-secondary"
+            type="button" 
             onClick={() => setActiveTab('market_corn')}
-            style={{ padding: '9px 16px', fontSize: '0.84rem', fontWeight: 700, borderRadius: '10px' }}
+            className="btn btn-secondary"
+            style={{ fontSize: '0.82rem', fontWeight: 600, padding: '8px 14px', borderRadius: '8px' }}
           >
-            <Wheat size={15} style={{ color: '#D97706' }} /> Pesan Pakan Jagung
+            Pesan Pakan Jagung
           </button>
           <button 
-            className="btn btn-primary"
+            type="button" 
             onClick={() => setActiveTab('market_eggs')}
-            style={{ padding: '9px 18px', fontSize: '0.84rem', fontWeight: 700, borderRadius: '10px' }}
+            className="btn btn-primary"
+            style={{ fontSize: '0.82rem', fontWeight: 700, padding: '8px 16px', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}
           >
-            <PlusCircle size={16} /> Kelola Pasokan Telur
+            <Plus size={15} /> Kelola Pasokan Telur
           </button>
         </div>
       </div>
 
-      {/* KPI Cards Grid */}
-      <div className="pro-kpi-grid">
-        {/* KPI 1: Pakan Terbeli */}
-        <div className="pro-kpi-card" style={{ borderLeft: '4px solid #D97706' }}>
-          <div className="pro-kpi-card-header">
-            <span className="pro-kpi-label">Pakan Jagung Terbeli</span>
-            <div className="pro-kpi-icon" style={{ background: '#FEF3C7', color: '#B45309' }}>
-              <Wheat size={18} />
-            </div>
+      {/* Clean 4-Metric Grid */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px', marginBottom: '28px' }}>
+        <div style={{ background: '#FFFFFF', border: '1px solid var(--border-subtle)', borderRadius: '12px', padding: '18px 20px' }}>
+          <div style={{ fontSize: '0.74rem', fontWeight: 700, color: 'var(--slate-500)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+            Pakan Terbeli
           </div>
-          <div className="pro-kpi-value">
-            {totalFeedProcuredKg > 0 ? totalFeedProcuredKg.toLocaleString() : '5.500'} <span style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--slate-500)' }}>Kg</span>
+          <div style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--slate-900)', marginTop: '6px', letterSpacing: '-0.03em' }}>
+            {totalFeedProcuredKg > 0 ? totalFeedProcuredKg.toLocaleString() : '5.500'} <span style={{ fontSize: '0.88rem', fontWeight: 600, color: 'var(--slate-400)' }}>kg</span>
           </div>
-          <div className="pro-kpi-subtext">
-            <span className="pro-kpi-badge" style={{ background: '#FEF3C7', color: '#B45309' }}>
-              <ShieldCheck size={12} /> KA ≤ 14%
-            </span>
-            <span>Langsung dari petani Sigi</span>
+          <div style={{ fontSize: '0.76rem', color: 'var(--slate-500)', marginTop: '4px' }}>
+            Langsung dari petani Sigi (KA ≤14%)
           </div>
         </div>
 
-        {/* KPI 2: Kontrak B2B Aktif */}
-        <div className="pro-kpi-card" style={{ borderLeft: '4px solid #059669' }}>
-          <div className="pro-kpi-card-header">
-            <span className="pro-kpi-label">Kontrak Pasokan B2B</span>
-            <div className="pro-kpi-icon" style={{ background: '#ECFDF5', color: '#047857' }}>
-              <FileCheck2 size={18} />
-            </div>
+        <div style={{ background: '#FFFFFF', border: '1px solid var(--border-subtle)', borderRadius: '12px', padding: '18px 20px' }}>
+          <div style={{ fontSize: '0.74rem', fontWeight: 700, color: 'var(--slate-500)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+            Kontrak Pasokan B2B
           </div>
-          <div className="pro-kpi-value" style={{ color: '#047857' }}>
-            {activeContractsCount > 0 ? activeContractsCount : 1} <span style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--slate-500)' }}>Mitra UMKM</span>
+          <div style={{ fontSize: '1.75rem', fontWeight: 800, color: '#047857', marginTop: '6px', letterSpacing: '-0.03em' }}>
+            {activeContractsCount > 0 ? activeContractsCount : 1} <span style={{ fontSize: '0.88rem', fontWeight: 600, color: 'var(--slate-400)' }}>Mitra</span>
           </div>
-          <div className="pro-kpi-subtext">
-            <span className="pro-kpi-badge" style={{ background: '#ECFDF5', color: '#047857' }}>
-              <Store size={12} /> Dilla Bakery Palu
-            </span>
-            <span>Pasokan rutin mingguan</span>
+          <div style={{ fontSize: '0.76rem', color: 'var(--slate-500)', marginTop: '4px' }}>
+            Jadwal pengiriman rutin mingguan
           </div>
         </div>
 
-        {/* KPI 3: Kapasitas Produksi */}
-        <div className="pro-kpi-card" style={{ borderLeft: '4px solid #2563EB' }}>
-          <div className="pro-kpi-card-header">
-            <span className="pro-kpi-label">Produksi Harian Layer</span>
-            <div className="pro-kpi-icon" style={{ background: '#EFF6FF', color: '#2563EB' }}>
-              <Egg size={18} />
-            </div>
+        <div style={{ background: '#FFFFFF', border: '1px solid var(--border-subtle)', borderRadius: '12px', padding: '18px 20px' }}>
+          <div style={{ fontSize: '0.74rem', fontWeight: 700, color: 'var(--slate-500)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+            Produksi Harian
           </div>
-          <div className="pro-kpi-value">
-            150-180 <span style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--slate-500)' }}>Rak/Hari</span>
+          <div style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--slate-900)', marginTop: '6px', letterSpacing: '-0.03em' }}>
+            160-180 <span style={{ fontSize: '0.88rem', fontWeight: 600, color: 'var(--slate-400)' }}>rak/hari</span>
           </div>
-          <div className="pro-kpi-subtext">
-            <span className="pro-kpi-badge" style={{ background: '#EFF6FF', color: '#2563EB' }}>
-              Grade A
-            </span>
-            <span>6.000 Ekor Layer Hen Balaroa</span>
+          <div style={{ fontSize: '0.76rem', color: 'var(--slate-500)', marginTop: '4px' }}>
+            Grade A Segar (Balaroa, Palu Barat)
           </div>
         </div>
 
-        {/* KPI 4: Omzet Telur Terlindungi */}
-        <div className="pro-kpi-card" style={{ borderLeft: '4px solid #F59E0B' }}>
-          <div className="pro-kpi-card-header">
-            <span className="pro-kpi-label">Omzet Terlindungi Escrow</span>
-            <div className="pro-kpi-icon" style={{ background: '#FFFBEB', color: '#D97706' }}>
-              <DollarSign size={18} />
-            </div>
+        <div style={{ background: '#FFFFFF', border: '1px solid var(--border-subtle)', borderRadius: '12px', padding: '18px 20px' }}>
+          <div style={{ fontSize: '0.74rem', fontWeight: 700, color: 'var(--slate-500)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+            Total Omzet Telur
           </div>
-          <div className="pro-kpi-value" style={{ color: 'var(--slate-900)' }}>
+          <div style={{ fontSize: '1.75rem', fontWeight: 800, color: '#047857', marginTop: '6px', letterSpacing: '-0.03em' }}>
             Rp {totalEggRevenue > 0 ? totalEggRevenue.toLocaleString('id-ID') : '42.800.000'}
           </div>
-          <div className="pro-kpi-subtext">
-            <span className="pro-kpi-badge" style={{ background: '#FFFBEB', color: '#B45309' }}>
-              <Star size={12} fill="#B45309" /> 4.95 Rating
-            </span>
-            <span>Pencairan dana tepat waktu</span>
+          <div style={{ fontSize: '0.76rem', color: 'var(--slate-500)', marginTop: '4px' }}>
+            Terlindungi rekening bersama BAST
           </div>
         </div>
       </div>
 
-      {/* 2-Column Layout */}
-      <div className="pro-layout-2col">
-        {/* Left Column: Contracts & Feed Orders */}
-        <div>
-          {/* Panel 1: Active B2B Contracts */}
-          <div className="pro-card">
-            <div className="pro-card-header">
-              <h3 className="pro-card-title">
-                <FileCheck2 size={18} style={{ color: '#047857' }} />
-                Kontrak Pasokan Rutin ke UMKM Bakery
-              </h3>
+      {/* 2-Column Section */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 320px', gap: '24px' }}>
+        {/* Left: Animated Chart, Contracts & Feed Orders */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+          {/* Animated Chart */}
+          <AnimatedTrendChart 
+            title="Produksi Telur Harian & Rasio Konsumsi Pakan"
+            subtitle="Output panen telur (rak/hari) vs rasio asupan ransum pakan jagung mandiri"
+            unit="rak"
+            secondaryUnit="kg"
+            primaryLegend="Produksi Telur"
+            secondaryLegend="Asupan Pakan Harian"
+            primaryColor="#047857"
+            secondaryColor="#D97706"
+            data={eggProductionTrend}
+            formatValue={(v) => `${v} rak`}
+            formatSecondaryValue={(v) => `${v} kg`}
+            height={200}
+          />
+
+          {/* Active B2B Contracts Table */}
+          <div style={{ background: '#FFFFFF', border: '1px solid var(--border-subtle)', borderRadius: '12px', overflow: 'hidden' }}>
+            <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--border-subtle)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h2 style={{ fontSize: '0.94rem', fontWeight: 800, color: 'var(--slate-900)', margin: 0 }}>
+                Kontrak Pasokan Rutin B2B Aktif
+              </h2>
               <button 
-                className="btn btn-sm btn-outline"
+                type="button" 
                 onClick={() => setActiveTab('contracts')}
-                style={{ fontSize: '0.78rem', borderRadius: '8px' }}
+                style={{ background: 'none', border: 'none', color: 'var(--primary-700)', fontSize: '0.78rem', fontWeight: 700, cursor: 'pointer', padding: 0 }}
               >
                 Semua Kontrak ({myContracts.length})
               </button>
             </div>
 
-            <div className="pro-card-body" style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-              {myContracts.map(contract => (
-                <div key={contract.id} className="pro-list-item" style={{ flexDirection: 'column', alignItems: 'stretch', gap: '12px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '8px' }}>
-                    <div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <span style={{ fontWeight: 800, fontSize: '0.96rem', color: 'var(--slate-900)' }}>
-                          {contract.buyerName}
-                        </span>
-                        <span className="badge badge-success" style={{ fontSize: '0.68rem' }}>
-                          Kontrak Aktif
-                        </span>
-                      </div>
-                      <div style={{ fontSize: '0.78rem', color: 'var(--slate-500)', marginTop: '2px' }}>
-                        Kode: <strong>{contract.code}</strong> • Jadwal: <strong>{contract.frequency} ({contract.volumePerCycle} {contract.unitType}/Batch)</strong>
-                      </div>
-                    </div>
-
-                    <div style={{ textAlign: 'right' }}>
-                      <div style={{ fontWeight: 800, fontSize: '1.05rem', color: '#047857' }}>
-                        Rp {contract.pricePerUnit.toLocaleString('id-ID')} <span style={{ fontSize: '0.76rem', color: 'var(--slate-500)' }}>/Rak</span>
-                      </div>
-                      <div style={{ fontSize: '0.74rem', color: 'var(--slate-500)' }}>
-                        Total Nilai: Rp {contract.estimatedTotalValue.toLocaleString('id-ID')}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Cycle Progress Bar */}
-                  <div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.76rem', marginBottom: '6px', color: 'var(--slate-600)' }}>
-                      <span>Realisasi Pengiriman: <strong>{contract.completedCycles} dari {contract.totalCycles} Batch</strong></span>
-                      <span>Next Delivery: <strong>{contract.nextDeliveryDate}</strong></span>
-                    </div>
-                    <div style={{ width: '100%', height: '8px', background: 'var(--slate-100)', borderRadius: '4px', overflow: 'hidden' }}>
-                      <div 
-                        style={{ 
-                          width: `${(contract.completedCycles / contract.totalCycles) * 100}%`, 
-                          height: '100%', 
-                          background: 'var(--primary-600)', 
-                          borderRadius: '4px' 
-                        }} 
-                      />
-                    </div>
-                  </div>
-
-                  {/* Actions */}
-                  <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', paddingTop: '6px', borderTop: '1px solid var(--slate-100)' }}>
-                    <button 
-                      className="btn btn-sm btn-secondary"
-                      onClick={() => onSelectContract(contract)}
-                      style={{ fontSize: '0.78rem', borderRadius: '8px' }}
-                    >
-                      Lihat Detail BAST
-                    </button>
-                    {contract.status === 'active' && contract.completedCycles < contract.totalCycles && (
-                      <button 
-                        className="btn btn-sm btn-primary"
-                        onClick={() => fulfillContractCycle(contract.id, contract.completedCycles + 1)}
-                        style={{ fontSize: '0.78rem', borderRadius: '8px', gap: '6px' }}
-                      >
-                        <Truck size={14} /> Kirim Batch #{contract.completedCycles + 1}
-                      </button>
-                    )}
-                  </div>
-                </div>
-              ))}
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem', textAlign: 'left' }}>
+                <thead>
+                  <tr style={{ background: 'var(--slate-50)', borderBottom: '1px solid var(--border-subtle)', color: 'var(--slate-500)', fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                    <th style={{ padding: '10px 16px', fontWeight: 700 }}>Mitra UMKM</th>
+                    <th style={{ padding: '10px 16px', fontWeight: 700 }}>Frekuensi & Volume</th>
+                    <th style={{ padding: '10px 16px', fontWeight: 700 }}>Harga Terkunci</th>
+                    <th style={{ padding: '10px 16px', fontWeight: 700 }}>Progres Siklus</th>
+                    <th style={{ padding: '10px 16px', fontWeight: 700, textAlign: 'right' }}>Aksi</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {myContracts.map(contract => (
+                    <tr key={contract.id} style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+                      <td style={{ padding: '12px 16px' }}>
+                        <div style={{ fontWeight: 700, color: 'var(--slate-900)' }}>{contract.buyerName}</div>
+                        <div style={{ fontSize: '0.72rem', color: 'var(--slate-500)' }}>{contract.code}</div>
+                      </td>
+                      <td style={{ padding: '12px 16px' }}>
+                        <div>{contract.volumePerCycle} {contract.unitType} / Batch</div>
+                        <div style={{ fontSize: '0.72rem', color: 'var(--slate-500)' }}>{contract.frequency}</div>
+                      </td>
+                      <td style={{ padding: '12px 16px', fontWeight: 700, color: '#047857' }}>
+                        Rp {contract.pricePerUnit.toLocaleString('id-ID')} <span style={{ fontSize: '0.72rem', fontWeight: 500, color: 'var(--slate-500)' }}>/rak</span>
+                      </td>
+                      <td style={{ padding: '12px 16px' }}>
+                        <div style={{ fontSize: '0.74rem', color: 'var(--slate-700)', marginBottom: '4px' }}>
+                          {contract.completedCycles} dari {contract.totalCycles} Batch
+                        </div>
+                        <div style={{ width: '100px', height: '6px', background: 'var(--slate-100)', borderRadius: '3px', overflow: 'hidden' }}>
+                          <div style={{ width: `${(contract.completedCycles / contract.totalCycles) * 100}%`, height: '100%', background: 'var(--primary-600)' }} />
+                        </div>
+                      </td>
+                      <td style={{ padding: '12px 16px', textAlign: 'right' }}>
+                        <div style={{ display: 'inline-flex', gap: '6px' }}>
+                          <button
+                            type="button"
+                            onClick={() => onSelectContract(contract)}
+                            className="btn btn-secondary"
+                            style={{ padding: '4px 8px', fontSize: '0.74rem', borderRadius: '6px' }}
+                          >
+                            BAST
+                          </button>
+                          {contract.status === 'active' && contract.completedCycles < contract.totalCycles && (
+                            <button
+                              type="button"
+                              onClick={() => fulfillContractCycle(contract.id, contract.completedCycles + 1)}
+                              className="btn btn-primary"
+                              style={{ padding: '4px 10px', fontSize: '0.74rem', borderRadius: '6px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                            >
+                              <Truck size={12} /> Kirim #{contract.completedCycles + 1}
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
 
-          {/* Panel 2: Corn Feed Orders (Purchases) */}
-          <div className="pro-card">
-            <div className="pro-card-header">
-              <h3 className="pro-card-title">
-                <Wheat size={18} style={{ color: '#D97706' }} />
-                Pengadaan Pakan Jagung Pipil dari Petani Sigi
-              </h3>
+          {/* Corn Feed Orders (Purchases) Table */}
+          <div style={{ background: '#FFFFFF', border: '1px solid var(--border-subtle)', borderRadius: '12px', overflow: 'hidden' }}>
+            <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--border-subtle)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h2 style={{ fontSize: '0.94rem', fontWeight: 800, color: 'var(--slate-900)', margin: 0 }}>
+                Pengadaan Pakan Jagung Pipil (Petani Sigi)
+              </h2>
               <button 
-                className="btn btn-sm btn-harvest"
+                type="button" 
                 onClick={() => setActiveTab('market_corn')}
-                style={{ fontSize: '0.78rem', borderRadius: '8px' }}
+                style={{ background: 'none', border: 'none', color: 'var(--primary-700)', fontSize: '0.78rem', fontWeight: 700, cursor: 'pointer', padding: 0 }}
               >
-                + Beli Jagung Pipil Baru
+                + Beli Baru
               </button>
             </div>
 
-            <div className="pro-card-body" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              {myFeedOrders.map(order => (
-                <div 
-                  key={order.id} 
-                  className="pro-list-item"
-                  style={{ cursor: 'pointer' }}
-                  onClick={() => onSelectOrder(order)}
-                >
-                  <div>
-                    <div style={{ fontWeight: 800, fontSize: '0.9rem', color: 'var(--slate-900)' }}>
-                      {order.sellerName} (Petani Sigi)
-                    </div>
-                    <div style={{ fontSize: '0.76rem', color: 'var(--slate-500)', marginTop: '2px' }}>
-                      {order.code} • {order.quantity.toLocaleString()} Kg • {order.deliveryMethod}
-                    </div>
-                  </div>
-
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <div style={{ textAlign: 'right' }}>
-                      <div style={{ fontWeight: 800, fontSize: '0.92rem', color: '#D97706' }}>
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem', textAlign: 'left' }}>
+                <thead>
+                  <tr style={{ background: 'var(--slate-50)', borderBottom: '1px solid var(--border-subtle)', color: 'var(--slate-500)', fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                    <th style={{ padding: '10px 16px', fontWeight: 700 }}>No. Pesanan</th>
+                    <th style={{ padding: '10px 16px', fontWeight: 700 }}>Petani Sigi</th>
+                    <th style={{ padding: '10px 16px', fontWeight: 700 }}>Volume</th>
+                    <th style={{ padding: '10px 16px', fontWeight: 700 }}>Total Biaya</th>
+                    <th style={{ padding: '10px 16px', fontWeight: 700, textAlign: 'right' }}>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {myFeedOrders.map(order => (
+                    <tr 
+                      key={order.id} 
+                      onClick={() => onSelectOrder(order)}
+                      style={{ borderBottom: '1px solid var(--border-subtle)', cursor: 'pointer', transition: 'background 0.15s' }}
+                      onMouseEnter={e => (e.currentTarget.style.background = 'var(--slate-50)')}
+                      onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+                    >
+                      <td style={{ padding: '12px 16px', fontWeight: 700, color: 'var(--slate-900)' }}>
+                        {order.code}
+                      </td>
+                      <td style={{ padding: '12px 16px' }}>
+                        <div>{order.sellerName}</div>
+                        <div style={{ fontSize: '0.72rem', color: 'var(--slate-500)' }}>{order.deliveryMethod}</div>
+                      </td>
+                      <td style={{ padding: '12px 16px', fontWeight: 600 }}>
+                        {order.quantity.toLocaleString()} kg
+                      </td>
+                      <td style={{ padding: '12px 16px', fontWeight: 700, color: 'var(--slate-900)' }}>
                         Rp {order.totalAmount.toLocaleString('id-ID')}
-                      </div>
-                      <span className={`badge ${
-                        order.status === 'completed' ? 'badge-success' :
-                        order.status === 'in_delivery' ? 'badge-info' : 'badge-warning'
-                      }`} style={{ fontSize: '0.68rem' }}>
-                        {order.status === 'completed' ? '✓ Diterima' :
-                         order.status === 'in_delivery' ? '🚚 Sedang Kirim' : '⏳ Diproses'}
-                      </span>
-                    </div>
-                    <ArrowRight size={15} style={{ color: 'var(--slate-400)' }} />
-                  </div>
-                </div>
-              ))}
+                      </td>
+                      <td style={{ padding: '12px 16px', textAlign: 'right' }}>
+                        <span style={{ 
+                          background: order.status === 'completed' ? '#ECFDF5' : '#EFF6FF', 
+                          color: order.status === 'completed' ? '#047857' : '#1D4ED8', 
+                          padding: '3px 8px', 
+                          borderRadius: '5px', 
+                          fontSize: '0.72rem', 
+                          fontWeight: 700 
+                        }}>
+                          {order.status === 'completed' ? 'Diterima di Kandang' : 'Dalam Pengiriman'}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
 
-        {/* Right Column: Market Spot & QC Guarantees */}
-        <div>
-          {/* Widget 1: Bulletin Harga Pasar Telur & Jagung Sulteng */}
-          <div className="pro-card">
-            <div className="pro-card-header">
-              <h4 className="pro-card-title" style={{ fontSize: '0.92rem' }}>
-                <TrendingUp size={16} style={{ color: '#047857' }} />
-                Bulletin Pasar Telur & Pakan Sulteng
-              </h4>
+        {/* Right Sidebar */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          {/* Price Benchmarks */}
+          <div style={{ background: '#FFFFFF', border: '1px solid var(--border-subtle)', borderRadius: '12px', padding: '18px 20px' }}>
+            <div style={{ fontSize: '0.86rem', fontWeight: 800, color: 'var(--slate-900)', marginBottom: '12px' }}>
+              Acuan Pasar Telur & Pakan Sulteng
             </div>
-            <div className="pro-card-body" style={{ padding: '14px 20px' }}>
-              <div className="pro-table-row">
-                <span style={{ color: 'var(--slate-600)' }}>🥚 Telur Rak Grade A (Kota Palu)</span>
-                <strong style={{ color: '#047857' }}>Rp 51.000 - 52.000</strong>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '0.8rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', paddingBottom: '8px', borderBottom: '1px solid var(--border-subtle)' }}>
+                <span style={{ color: 'var(--slate-600)' }}>Telur Rak Grade A (Kota Palu)</span>
+                <strong style={{ color: '#047857' }}>Rp 51.500 /rak</strong>
               </div>
-              <div className="pro-table-row">
-                <span style={{ color: 'var(--slate-600)' }}>🌽 Jagung Pipil Sigi (KA ≤14%)</span>
-                <strong style={{ color: '#B45309' }}>Rp 5.200 /Kg</strong>
+              <div style={{ display: 'flex', justifyContent: 'space-between', paddingBottom: '8px', borderBottom: '1px solid var(--border-subtle)' }}>
+                <span style={{ color: 'var(--slate-600)' }}>Jagung Pipil Sigi (KA ≤14%)</span>
+                <strong style={{ color: 'var(--slate-900)' }}>Rp 5.200 /kg</strong>
               </div>
-              <div className="pro-table-row">
-                <span style={{ color: 'var(--slate-600)' }}>📈 Margin Efisiensi Pakan Mandiri</span>
-                <strong style={{ color: '#2563EB' }}>+14.2% Hemat</strong>
+              <div style={{ display: 'flex', justifyContent: 'space-between', paddingBottom: '8px', borderBottom: '1px solid var(--border-subtle)' }}>
+                <span style={{ color: 'var(--slate-600)' }}>Hemat Biaya Pakan Mandiri</span>
+                <strong style={{ color: '#047857' }}>+14.2% Efisiensi</strong>
               </div>
             </div>
           </div>
 
-          {/* Widget 2: Standar Mutu Telur Segar Grade A */}
-          <div className="pro-card" style={{ background: '#F0FDF4', borderColor: '#A7F3D0' }}>
-            <div className="pro-card-body">
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 800, color: '#047857', fontSize: '0.86rem', marginBottom: '8px' }}>
-                <ShieldCheck size={16} /> Garansi Mutu Telur Saudagro
-              </div>
-              <ul style={{ paddingLeft: '16px', margin: 0, fontSize: '0.74rem', color: '#065F46', lineHeight: 1.55 }}>
-                <li>Sortir bersih dari kotoran dan telur retak sebelum dimuat.</li>
-                <li>Garansi ganti rugi 1x24 jam jika ada telur retak di perjalanan.</li>
-                <li>Faktur B2B resmi untuk keperluan pembukuan UMKM.</li>
-              </ul>
+          {/* Quality Assurance Card */}
+          <div style={{ background: '#FFFFFF', border: '1px solid var(--border-subtle)', borderRadius: '12px', padding: '18px 20px' }}>
+            <div style={{ fontSize: '0.86rem', fontWeight: 800, color: 'var(--slate-900)', marginBottom: '8px' }}>
+              Standar Kualitas Telur Segar
             </div>
+            <p style={{ fontSize: '0.78rem', color: 'var(--slate-600)', lineHeight: 1.55, margin: '0 0 8px 0' }}>
+              • Sortir bersih dari kotoran & retak sebelum dimuat ke armada mitra.<br />
+              • Penggantian 1x24 jam untuk klaim retak di perjalanan.<br />
+              • Faktur digital resmi B2B untuk kebutuhan audit UMKM.
+            </p>
           </div>
         </div>
       </div>

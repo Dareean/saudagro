@@ -6,18 +6,13 @@ import {
   Wheat, 
   Egg, 
   AlertTriangle, 
-  CheckCircle2, 
   Users, 
   TrendingUp, 
-  MapPin, 
   FileText,
-  Activity,
-  Layers,
-  Scale,
-  Building2,
-  ArrowRight
+  Scale
 } from 'lucide-react';
 import { TransactionOrder } from '../types';
+import { AnimatedTrendChart } from './AnimatedTrendChart';
 
 interface AdminDashboardProps {
   onSelectOrder: (order: TransactionOrder) => void;
@@ -73,156 +68,112 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onSelectOrder })
     setResolutionText('');
   };
 
+  const platformGmvTrend = [
+    { label: 'Mei', dateStr: 'Mei 2026', value: 12500000, secondaryValue: 485000 },
+    { label: 'Jun', dateStr: 'Juni 2026', value: 18400000, secondaryValue: 712000 },
+    { label: 'Jul', dateStr: 'Juli 2026', value: 29800000, secondaryValue: 1150000 },
+    { label: 'Agu', dateStr: 'Agustus 2026', value: 38200000, secondaryValue: 1480000 },
+    { label: 'Sep W1', dateStr: 'Minggu 1-2 Sep', value: 44600000, secondaryValue: 1720000 },
+    { label: 'Sep Terkini', dateStr: 'Kumulatif Pasigala', value: gmv > 0 ? gmv : 53200000, secondaryValue: totalPlatformRevenue > 0 ? totalPlatformRevenue : 2056000 },
+  ];
+
   return (
-    <div className="pro-dashboard-wrapper">
-      {/* Dashboard Header Bar */}
-      <div className="pro-dashboard-header">
+    <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '28px 24px 60px 24px' }}>
+      {/* Top Header */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px', marginBottom: '24px' }}>
         <div>
-          <div className="pro-breadcrumb">
-            <span>Beranda</span>
-            <span>/</span>
-            <span className="active">Pusat Mediasi & Operasional Platform</span>
-          </div>
-          <h1 className="pro-dashboard-title">
-            <div style={{ 
-              width: '36px', 
-              height: '36px', 
-              borderRadius: '10px', 
-              background: '#EFF6FF', 
-              color: '#2563EB', 
-              display: 'inline-flex', 
-              alignItems: 'center', 
-              justifyContent: 'center' 
-            }}>
-              <ShieldCheck size={20} />
-            </div>
-            Pusat Mediasi & Monitoring Rantai Pasok Sulteng
+          <h1 style={{ fontSize: '1.45rem', fontWeight: 800, color: 'var(--slate-900)', letterSpacing: '-0.02em', margin: 0 }}>
+            Pusat Operasional & Mediasi Transaksi Rantai Pasok
           </h1>
-          <p className="pro-dashboard-subtitle">
-            Monitoring transaksi riil rantai pasok agribisnis Palu-Sigi-Donggala, rekonsiliasi komisi transparan (3%-5%), dan mediasi sengketa mutu panen.
+          <p style={{ fontSize: '0.84rem', color: 'var(--slate-500)', marginTop: '4px', margin: 0 }}>
+            Monitoring perputaran komoditas Pasigala, rekonsiliasi komisi (3%-5%), dan mediasi sengketa mutu BAST.
           </p>
         </div>
 
-        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-          <div style={{ 
-            background: '#ECFDF5', 
-            border: '1px solid #A7F3D0', 
-            padding: '8px 14px', 
-            borderRadius: '10px', 
-            display: 'flex', 
-            alignItems: 'center', 
-            gap: '8px',
-            fontSize: '0.82rem',
-            color: '#047857',
-            fontWeight: 700
-          }}>
-            <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#10B981' }} />
-            Sistem Mediasi Escrow Aktif 100%
-          </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '6px 12px', background: '#ECFDF5', border: '1px solid #A7F3D0', borderRadius: '8px', fontSize: '0.78rem', color: '#047857', fontWeight: 700 }}>
+          <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#10B981' }} />
+          Escrow & Mediasi Aktif
         </div>
       </div>
 
-      {/* KPI Cards Grid */}
-      <div className="pro-kpi-grid">
-        {/* KPI 1: Total Pendapatan Komisi */}
-        <div className="pro-kpi-card" style={{ borderLeft: '4px solid #059669' }}>
-          <div className="pro-kpi-card-header">
-            <span className="pro-kpi-label">Pendapatan Komisi Saudagro</span>
-            <div className="pro-kpi-icon" style={{ background: '#ECFDF5', color: '#047857' }}>
-              <DollarSign size={18} />
-            </div>
+      {/* Clean 4-Metric Grid */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px', marginBottom: '28px' }}>
+        <div style={{ background: '#FFFFFF', border: '1px solid var(--border-subtle)', borderRadius: '12px', padding: '18px 20px' }}>
+          <div style={{ fontSize: '0.74rem', fontWeight: 700, color: 'var(--slate-500)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+            Pendapatan Komisi
           </div>
-          <div className="pro-kpi-value" style={{ color: '#047857' }}>
+          <div style={{ fontSize: '1.75rem', fontWeight: 800, color: '#047857', marginTop: '6px', letterSpacing: '-0.03em' }}>
             Rp {totalPlatformRevenue.toLocaleString('id-ID')}
           </div>
-          <div className="pro-kpi-subtext">
-            <span>3% Jagung & 5% Pasokan Telur</span>
+          <div style={{ fontSize: '0.76rem', color: 'var(--slate-500)', marginTop: '4px' }}>
+            3% Jagung & 5% Pasokan Telur
           </div>
         </div>
 
-        {/* KPI 2: Gross Merchandise Value */}
-        <div className="pro-kpi-card" style={{ borderLeft: '4px solid #2563EB' }}>
-          <div className="pro-kpi-card-header">
-            <span className="pro-kpi-label">Total Nilai Transaksi (GMV)</span>
-            <div className="pro-kpi-icon" style={{ background: '#EFF6FF', color: '#2563EB' }}>
-              <TrendingUp size={18} />
-            </div>
+        <div style={{ background: '#FFFFFF', border: '1px solid var(--border-subtle)', borderRadius: '12px', padding: '18px 20px' }}>
+          <div style={{ fontSize: '0.74rem', fontWeight: 700, color: 'var(--slate-500)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+            Total Transaksi (GMV)
           </div>
-          <div className="pro-kpi-value">
+          <div style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--slate-900)', marginTop: '6px', letterSpacing: '-0.03em' }}>
             Rp {gmv.toLocaleString('id-ID')}
           </div>
-          <div className="pro-kpi-subtext">
-            <span className="pro-kpi-badge" style={{ background: '#EFF6FF', color: '#2563EB' }}>
-              Pasigala Hub
-            </span>
-            <span>Volume terserap pasar lokal</span>
+          <div style={{ fontSize: '0.76rem', color: 'var(--slate-500)', marginTop: '4px' }}>
+            Nilai komoditas beredar di Pasigala Hub
           </div>
         </div>
 
-        {/* KPI 3: Jagung Termediasi */}
-        <div className="pro-kpi-card" style={{ borderLeft: '4px solid #D97706' }}>
-          <div className="pro-kpi-card-header">
-            <span className="pro-kpi-label">Jagung Sigi Termediasi</span>
-            <div className="pro-kpi-icon" style={{ background: '#FEF3C7', color: '#B45309' }}>
-              <Wheat size={18} />
-            </div>
+        <div style={{ background: '#FFFFFF', border: '1px solid var(--border-subtle)', borderRadius: '12px', padding: '18px 20px' }}>
+          <div style={{ fontSize: '0.74rem', fontWeight: 700, color: 'var(--slate-500)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+            Jagung Sigi Terserap
           </div>
-          <div className="pro-kpi-value">
-            {totalCornKg.toLocaleString()} <span style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--slate-500)' }}>Kg</span>
+          <div style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--slate-900)', marginTop: '6px', letterSpacing: '-0.03em' }}>
+            {totalCornKg.toLocaleString()} <span style={{ fontSize: '0.88rem', fontWeight: 600, color: 'var(--slate-400)' }}>kg</span>
           </div>
-          <div className="pro-kpi-subtext">
-            <span>{(totalCornKg / 1000).toFixed(1)} Ton terserap peternak</span>
+          <div style={{ fontSize: '0.76rem', color: 'var(--slate-500)', marginTop: '4px' }}>
+            {(totalCornKg / 1000).toFixed(1)} Ton pakan langsung ke peternak
           </div>
         </div>
 
-        {/* KPI 4: Mitra Terdaftar */}
-        <div className="pro-kpi-card" style={{ borderLeft: '4px solid #7C3AED' }}>
-          <div className="pro-kpi-card-header">
-            <span className="pro-kpi-label">Mitra Terverifikasi</span>
-            <div className="pro-kpi-icon" style={{ background: '#F5F3FF', color: '#7C3AED' }}>
-              <Users size={18} />
-            </div>
+        <div style={{ background: '#FFFFFF', border: '1px solid var(--border-subtle)', borderRadius: '12px', padding: '18px 20px' }}>
+          <div style={{ fontSize: '0.74rem', fontWeight: 700, color: 'var(--slate-500)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+            Mitra Terverifikasi
           </div>
-          <div className="pro-kpi-value">
-            {Object.keys(allUsers).length} <span style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--slate-500)' }}>Mitra</span>
+          <div style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--slate-900)', marginTop: '6px', letterSpacing: '-0.03em' }}>
+            {Object.keys(allUsers).length} <span style={{ fontSize: '0.88rem', fontWeight: 600, color: 'var(--slate-400)' }}>Mitra</span>
           </div>
-          <div className="pro-kpi-subtext">
-            <span>Petani, Peternak & UMKM Bakery</span>
+          <div style={{ fontSize: '0.76rem', color: 'var(--slate-500)', marginTop: '4px' }}>
+            Petani, Peternak, dan UMKM Bakery
           </div>
         </div>
       </div>
 
       {/* Disputes Alert Panel */}
       {disputedOrders.length > 0 && (
-        <div style={{ 
-          background: '#FEF2F2', 
-          border: '1.5px solid #FECACA', 
-          borderRadius: '16px', 
-          padding: '18px 20px', 
-          marginBottom: '28px' 
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#B91C1C', fontWeight: 800, fontSize: '0.96rem', marginBottom: '10px' }}>
-            <AlertTriangle size={18} />
-            Ada {disputedOrders.length} Laporan Sengketa / Dispute Menunggu Mediasi:
+        <div style={{ background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: '12px', padding: '16px 20px', marginBottom: '24px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#B91C1C', fontWeight: 800, fontSize: '0.9rem', marginBottom: '10px' }}>
+            <AlertTriangle size={16} />
+            Ada {disputedOrders.length} Pesanan Membutuhkan Mediasi Arbitrase:
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             {disputedOrders.map(order => (
               <div 
                 key={order.id} 
-                className="pro-list-item" 
-                style={{ background: 'white', cursor: 'pointer' }}
-                onClick={() => setSelectedDisputeOrder(order)}
+                style={{ background: '#FFFFFF', border: '1px solid #FECACA', borderRadius: '8px', padding: '10px 14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}
               >
                 <div>
-                  <div style={{ fontWeight: 800, fontSize: '0.9rem', color: 'var(--slate-900)' }}>
-                    {order.code} — Pembeli: {order.buyerName} vs Penjual: {order.sellerName}
+                  <div style={{ fontWeight: 700, fontSize: '0.84rem', color: 'var(--slate-900)' }}>
+                    {order.code} • Pembeli: {order.buyerName} vs Penjual: {order.sellerName}
                   </div>
-                  <div style={{ fontSize: '0.78rem', color: '#B91C1C', marginTop: '2px' }}>
-                    Alasan Sengketa: "{order.dispute?.reason || 'Klaim retur mutu / selisih timbangan'}"
+                  <div style={{ fontSize: '0.74rem', color: '#B91C1C', marginTop: '2px' }}>
+                    Alasan: "{order.dispute?.reason || 'Klaim penyesuaian mutu atau timbangan'}"
                   </div>
                 </div>
-                <button className="btn btn-primary btn-sm" style={{ borderRadius: '8px', fontSize: '0.78rem' }}>
-                  Buka Panel Arbitrase <ArrowRight size={13} />
+                <button
+                  type="button"
+                  onClick={() => setSelectedDisputeOrder(order)}
+                  style={{ background: '#B91C1C', color: '#FFFFFF', border: 'none', borderRadius: '6px', padding: '6px 12px', fontSize: '0.76rem', fontWeight: 700, cursor: 'pointer' }}
+                >
+                  Buka Mediasi
                 </button>
               </div>
             ))}
@@ -230,115 +181,137 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onSelectOrder })
         </div>
       )}
 
-      {/* Main 2-Column Layout */}
-      <div className="pro-layout-2col">
-        {/* Left Column: All Transactions */}
-        <div>
-          <div className="pro-card">
-            <div className="pro-card-header">
-              <h3 className="pro-card-title">
-                <FileText size={18} style={{ color: '#047857' }} />
-                Seluruh Log Transaksi Platform
-              </h3>
-              <span style={{ fontSize: '0.76rem', color: 'var(--slate-500)' }}>
+      {/* 2-Column Section */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 320px', gap: '24px' }}>
+        {/* Left: Animated Chart & Transaction Logs Table */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+          {/* Animated GMV Chart */}
+          <AnimatedTrendChart 
+            title="Tren Pertumbuhan GMV & Akumulasi Komisi Saudagro"
+            subtitle="Nilai transaksi komoditas Pasigala beredar & bagi hasil komisi platform (3% - 5%)"
+            unit="Rp"
+            secondaryUnit="Rp"
+            primaryLegend="GMV Transaksi"
+            secondaryLegend="Komisi Platform"
+            primaryColor="#047857"
+            secondaryColor="#7C3AED"
+            data={platformGmvTrend}
+            formatValue={(v) => `Rp ${(v / 1000000).toFixed(1)} Juta`}
+            formatSecondaryValue={(v) => `Rp ${(v / 1000).toFixed(0)} Ribu`}
+            height={200}
+          />
+
+          <div style={{ background: '#FFFFFF', border: '1px solid var(--border-subtle)', borderRadius: '12px', overflow: 'hidden' }}>
+            <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--border-subtle)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h2 style={{ fontSize: '0.94rem', fontWeight: 800, color: 'var(--slate-900)', margin: 0 }}>
+                Semua Log Transaksi Platform
+              </h2>
+              <span style={{ fontSize: '0.74rem', color: 'var(--slate-500)' }}>
                 Total: {orders.length} Transaksi
               </span>
             </div>
 
-            <div className="pro-card-body" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              {orders.slice(0, 6).map(order => (
-                <div 
-                  key={order.id} 
-                  className="pro-list-item"
-                  style={{ cursor: 'pointer' }}
-                  onClick={() => onSelectOrder(order)}
-                >
-                  <div>
-                    <div style={{ fontWeight: 800, fontSize: '0.9rem', color: 'var(--slate-900)' }}>
-                      {order.code} ({order.type === 'CORN' ? '🌽 Jagung Pipil' : '🥚 Telur Segar'})
-                    </div>
-                    <div style={{ fontSize: '0.76rem', color: 'var(--slate-500)', marginTop: '2px' }}>
-                      {order.sellerName} → {order.buyerName} • Volume: {order.quantity.toLocaleString()} {order.unit}
-                    </div>
-                  </div>
-
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <div style={{ textAlign: 'right' }}>
-                      <div style={{ fontWeight: 800, fontSize: '0.94rem', color: 'var(--slate-900)' }}>
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem', textAlign: 'left' }}>
+                <thead>
+                  <tr style={{ background: 'var(--slate-50)', borderBottom: '1px solid var(--border-subtle)', color: 'var(--slate-500)', fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                    <th style={{ padding: '10px 16px', fontWeight: 700 }}>No. Pesanan</th>
+                    <th style={{ padding: '10px 16px', fontWeight: 700 }}>Pihak Terlibat</th>
+                    <th style={{ padding: '10px 16px', fontWeight: 700 }}>Komoditas & Vol</th>
+                    <th style={{ padding: '10px 16px', fontWeight: 700 }}>Nilai Transaksi</th>
+                    <th style={{ padding: '10px 16px', fontWeight: 700, textAlign: 'right' }}>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {orders.slice(0, 8).map(order => (
+                    <tr 
+                      key={order.id} 
+                      onClick={() => onSelectOrder(order)}
+                      style={{ borderBottom: '1px solid var(--border-subtle)', cursor: 'pointer', transition: 'background 0.15s' }}
+                      onMouseEnter={e => (e.currentTarget.style.background = 'var(--slate-50)')}
+                      onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+                    >
+                      <td style={{ padding: '12px 16px', fontWeight: 700, color: 'var(--slate-900)' }}>
+                        {order.code}
+                      </td>
+                      <td style={{ padding: '12px 16px' }}>
+                        <div style={{ fontWeight: 600 }}>{order.sellerName} → {order.buyerName}</div>
+                        <div style={{ fontSize: '0.72rem', color: 'var(--slate-500)' }}>{order.deliveryMethod}</div>
+                      </td>
+                      <td style={{ padding: '12px 16px' }}>
+                        <div>{order.type === 'CORN' ? 'Jagung Pipil' : 'Telur Segar'}</div>
+                        <div style={{ fontSize: '0.72rem', color: 'var(--slate-500)' }}>{order.quantity.toLocaleString()} {order.unit}</div>
+                      </td>
+                      <td style={{ padding: '12px 16px', fontWeight: 700, color: 'var(--slate-900)' }}>
                         Rp {order.totalAmount.toLocaleString('id-ID')}
-                      </div>
-                      <span className={`badge ${
-                        order.status === 'completed' ? 'badge-success' :
-                        order.status === 'disputed' ? 'badge-danger' : 'badge-warning'
-                      }`} style={{ fontSize: '0.68rem' }}>
-                        {order.status === 'completed' ? '✓ Selesai' :
-                         order.status === 'disputed' ? '⚠️ Sengketa' : '⏳ Diproses'}
-                      </span>
-                    </div>
-                    <ArrowRight size={15} style={{ color: 'var(--slate-400)' }} />
-                  </div>
-                </div>
-              ))}
+                      </td>
+                      <td style={{ padding: '12px 16px', textAlign: 'right' }}>
+                        <span style={{ 
+                          background: order.status === 'completed' ? '#ECFDF5' : order.status === 'disputed' ? '#FEF2F2' : '#EFF6FF', 
+                          color: order.status === 'completed' ? '#047857' : order.status === 'disputed' ? '#B91C1C' : '#1D4ED8', 
+                          padding: '3px 8px', 
+                          borderRadius: '5px', 
+                          fontSize: '0.72rem', 
+                          fontWeight: 700 
+                        }}>
+                          {order.status === 'completed' ? 'Selesai' : order.status === 'disputed' ? 'Sengketa' : 'Diproses'}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
 
-        {/* Right Column: Dispute Form & Platform Health */}
-        <div>
+        {/* Right Sidebar: Dispute Form & Policy */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           {selectedDisputeOrder && (
-            <div className="pro-card" style={{ borderColor: '#FCA5A5' }}>
-              <div className="pro-card-header" style={{ background: '#FEF2F2' }}>
-                <h4 className="pro-card-title" style={{ fontSize: '0.92rem', color: '#B91C1C' }}>
-                  <Scale size={16} />
-                  Panel Putusan Arbitrase Mediasi
-                </h4>
+            <div style={{ background: '#FFFFFF', border: '1px solid #FECACA', borderRadius: '12px', padding: '18px 20px' }}>
+              <div style={{ fontSize: '0.86rem', fontWeight: 800, color: '#B91C1C', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <Scale size={16} /> Panel Putusan Mediasi
               </div>
-              <div className="pro-card-body">
-                <form onSubmit={handleResolveDispute}>
-                  <div style={{ fontSize: '0.8rem', marginBottom: '10px', color: 'var(--slate-700)' }}>
-                    Menyelesaikan sengketa pesanan <strong>{selectedDisputeOrder.code}</strong>. Masukkan rincian musyawarah atau penyesuaian timbangan/retur:
-                  </div>
-                  <textarea
-                    rows={3}
-                    className="form-textarea"
-                    placeholder="Contoh: Penjual menyetujui penyesuaian timbangan selisih 50kg dan dana escrow telah diteruskan secara proporsional..."
-                    value={resolutionText}
-                    onChange={e => setResolutionText(e.target.value)}
-                    style={{ fontSize: '0.82rem', marginBottom: '12px', borderRadius: '8px' }}
-                    required
-                  />
-                  <div style={{ display: 'flex', gap: '8px' }}>
-                    <button 
-                      type="button" 
-                      className="btn btn-sm btn-secondary" 
-                      onClick={() => setSelectedDisputeOrder(null)}
-                      style={{ flex: 1, borderRadius: '8px' }}
-                    >
-                      Batal
-                    </button>
-                    <button 
-                      type="submit" 
-                      className="btn btn-sm btn-primary" 
-                      style={{ flex: 2, borderRadius: '8px' }}
-                    >
-                      Putuskan & Selesaikan
-                    </button>
-                  </div>
-                </form>
-              </div>
+              <form onSubmit={handleResolveDispute}>
+                <div style={{ fontSize: '0.78rem', marginBottom: '8px', color: 'var(--slate-700)' }}>
+                  Menyelesaikan sengketa transaksi <strong>{selectedDisputeOrder.code}</strong>.
+                </div>
+                <textarea
+                  rows={3}
+                  className="form-textarea"
+                  placeholder="Catatan hasil musyawarah mediasi..."
+                  value={resolutionText}
+                  onChange={e => setResolutionText(e.target.value)}
+                  style={{ width: '100%', padding: '8px', fontSize: '0.78rem', borderRadius: '6px', border: '1px solid var(--border-subtle)', marginBottom: '10px', boxSizing: 'border-box' }}
+                  required
+                />
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <button 
+                    type="button" 
+                    onClick={() => setSelectedDisputeOrder(null)}
+                    style={{ flex: 1, padding: '6px', background: 'var(--slate-100)', color: 'var(--slate-700)', border: 'none', borderRadius: '6px', fontSize: '0.76rem', fontWeight: 700, cursor: 'pointer' }}
+                  >
+                    Batal
+                  </button>
+                  <button 
+                    type="submit" 
+                    style={{ flex: 2, padding: '6px', background: 'var(--primary-700)', color: '#FFFFFF', border: 'none', borderRadius: '6px', fontSize: '0.76rem', fontWeight: 700, cursor: 'pointer' }}
+                  >
+                    Putuskan
+                  </button>
+                </div>
+              </form>
             </div>
           )}
 
-          {/* Platform Trust & Policy Card */}
-          <div className="pro-card" style={{ background: '#F0FDF4', borderColor: '#A7F3D0' }}>
-            <div className="pro-card-body">
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 800, color: '#047857', fontSize: '0.88rem', marginBottom: '8px' }}>
-                <ShieldCheck size={16} /> Kebijakan Transparansi Komisi
-              </div>
-              <p style={{ fontSize: '0.76rem', color: '#065F46', lineHeight: 1.55, margin: 0 }}>
-                Komisi 3% pada jagung pipil dan 5% pada produk telur otomatis disalurkan untuk pemeliharaan sistem escrow, asuransi BAST, dan biaya operasional fasilitator pendamping lapangan di Palu, Sigi, & Donggala.
-              </p>
+          {/* Policy Card */}
+          <div style={{ background: '#FFFFFF', border: '1px solid var(--border-subtle)', borderRadius: '12px', padding: '18px 20px' }}>
+            <div style={{ fontSize: '0.86rem', fontWeight: 800, color: 'var(--slate-900)', marginBottom: '8px' }}>
+              Transparansi Komisi Platform
             </div>
+            <p style={{ fontSize: '0.78rem', color: 'var(--slate-600)', lineHeight: 1.55, margin: 0 }}>
+              Komisi 3% pada komoditas jagung pipil dan 5% pada pasokan telur dialokasikan langsung untuk operasional rekening bersama BAST, asuransi klaim mutu, dan honorarium pendamping lapangan desa di Palu, Sigi, & Donggala.
+            </p>
           </div>
         </div>
       </div>

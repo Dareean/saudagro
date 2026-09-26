@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { AppProvider, useApp } from './context/AppContext';
 import { LandingPage } from './components/LandingPage';
-import { Navbar } from './components/Navbar';
-import { PersonaBanner } from './components/PersonaBanner';
+import { Sidebar } from './components/Sidebar';
+import { TopHeader } from './components/TopHeader';
+import { TermsModal } from './components/TermsModal';
 import { MarketplaceCorn } from './components/MarketplaceCorn';
 import { MarketplaceEggs } from './components/MarketplaceEggs';
 import { FarmerDashboard } from './components/FarmerDashboard';
@@ -15,7 +16,6 @@ import { OrderDetailsModal } from './components/OrderDetailsModal';
 import { ContractDetailsModal } from './components/ContractDetailsModal';
 import { AssistedRegisterModal } from './components/AssistedRegisterModal';
 import { NotificationModal } from './components/NotificationModal';
-import { MobileNav } from './components/MobileNav';
 import { TransactionOrder, B2BContract } from './types';
 
 const MainApp: React.FC = () => {
@@ -25,6 +25,8 @@ const MainApp: React.FC = () => {
   const [selectedContract, setSelectedContract] = useState<B2BContract | null>(null);
   const [showAssistedRegister, setShowAssistedRegister] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [showTermsModal, setShowTermsModal] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // If not logged in, show the comprehensive B2B Landing Page first
   if (!isAuthenticated) {
@@ -47,51 +49,59 @@ const MainApp: React.FC = () => {
   const isAdminRole = currentUser.role === 'ADMIN';
 
   return (
-    <div className="app-container">
-      {/* Header Bar */}
-      <Navbar 
+    <div className="app-layout-root">
+      {/* Enterprise Left Sidebar */}
+      <Sidebar 
+        isOpenMobile={mobileMenuOpen}
+        onCloseMobile={() => setMobileMenuOpen(false)}
         onOpenAssistedRegister={() => setShowAssistedRegister(true)}
-        onOpenNotifications={() => setShowNotifications(true)}
+        onOpenTermsModal={() => setShowTermsModal(true)}
       />
 
-      {/* Role / Persona Banner */}
-      <PersonaBanner />
+      {/* Main Canvas Area */}
+      <div className="app-main-canvas">
+        {/* Top Header Bar */}
+        <TopHeader 
+          onToggleMobileMenu={() => setMobileMenuOpen(!mobileMenuOpen)}
+          onOpenNotifications={() => setShowNotifications(true)}
+        />
 
-      {/* Main View Router */}
-      <main>
-        {activeTab === 'market_corn' && <MarketplaceCorn />}
-        {activeTab === 'market_eggs' && <MarketplaceEggs />}
-        
-        {(activeTab === 'dashboard_farmer' || (activeTab === 'dashboard' && isFarmerRole)) && (
-          <FarmerDashboard onSelectOrder={setSelectedOrder} />
-        )}
-        
-        {(activeTab === 'dashboard_egg_farmer' || (activeTab === 'dashboard' && isEggFarmerRole)) && (
-          <EggFarmerDashboard 
-            onSelectOrder={setSelectedOrder} 
-            onSelectContract={setSelectedContract} 
-          />
-        )}
-        
-        {(activeTab === 'dashboard_umkm' || (activeTab === 'dashboard' && isUMKMRole)) && (
-          <UMKMDashboard 
-            onSelectOrder={setSelectedOrder} 
-            onSelectContract={setSelectedContract} 
-          />
-        )}
+        {/* View Router */}
+        <main style={{ flex: 1, minHeight: 'calc(100vh - 64px)' }}>
+          {activeTab === 'market_corn' && <MarketplaceCorn />}
+          {activeTab === 'market_eggs' && <MarketplaceEggs />}
+          
+          {(activeTab === 'dashboard_farmer' || (activeTab === 'dashboard' && isFarmerRole)) && (
+            <FarmerDashboard onSelectOrder={setSelectedOrder} />
+          )}
+          
+          {(activeTab === 'dashboard_egg_farmer' || (activeTab === 'dashboard' && isEggFarmerRole)) && (
+            <EggFarmerDashboard 
+              onSelectOrder={setSelectedOrder} 
+              onSelectContract={setSelectedContract} 
+            />
+          )}
+          
+          {(activeTab === 'dashboard_umkm' || (activeTab === 'dashboard' && isUMKMRole)) && (
+            <UMKMDashboard 
+              onSelectOrder={setSelectedOrder} 
+              onSelectContract={setSelectedContract} 
+            />
+          )}
 
-        {(activeTab === 'admin' || (activeTab === 'dashboard' && isAdminRole)) && (
-          <AdminDashboard onSelectOrder={setSelectedOrder} />
-        )}
+          {(activeTab === 'admin' || (activeTab === 'dashboard' && isAdminRole)) && (
+            <AdminDashboard onSelectOrder={setSelectedOrder} />
+          )}
 
-        {activeTab === 'contracts' && (
-          <B2BContractsView onSelectContract={setSelectedContract} />
-        )}
+          {activeTab === 'contracts' && (
+            <B2BContractsView onSelectContract={setSelectedContract} />
+          )}
 
-        {activeTab === 'history' && (
-          <TransactionHistoryView onSelectOrder={setSelectedOrder} />
-        )}
-      </main>
+          {activeTab === 'history' && (
+            <TransactionHistoryView onSelectOrder={setSelectedOrder} />
+          )}
+        </main>
+      </div>
 
       {/* Interactive Modals */}
       <OrderDetailsModal 
@@ -114,8 +124,10 @@ const MainApp: React.FC = () => {
         onClose={() => setShowNotifications(false)}
       />
 
-      {/* Fixed Mobile Navigation */}
-      <MobileNav onOpenNotifications={() => setShowNotifications(true)} />
+      <TermsModal 
+        isOpen={showTermsModal}
+        onClose={() => setShowTermsModal(false)}
+      />
     </div>
   );
 };

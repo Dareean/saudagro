@@ -62,7 +62,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenAssistedRegister, onOpenNo
     <header className="header-bar">
       <div className="main-wrapper header-content">
         {/* Brand */}
-        <div className="brand-logo" onClick={() => setActiveTab('market_corn')}>
+        <div className="brand-logo" onClick={() => setActiveTab('dashboard')}>
           <div className="brand-icon-box" style={{ background: 'white', border: '1px solid var(--border-subtle)', padding: '3px' }}>
             <img 
               src="/logo/saudagro-icon.png" 
