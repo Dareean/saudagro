@@ -13,6 +13,7 @@ import { AdminDashboard } from './components/AdminDashboard';
 import { B2BContractsView } from './components/B2BContractsView';
 import { TransactionHistoryView } from './components/TransactionHistoryView';
 import { ProfilePage } from './components/ProfilePage';
+import { ProductDetailPage } from './components/ProductDetailPage';
 import { OrderDetailsModal } from './components/OrderDetailsModal';
 import { ContractDetailsModal } from './components/ContractDetailsModal';
 import { AssistedRegisterModal } from './components/AssistedRegisterModal';
@@ -104,6 +105,10 @@ const MainApp: React.FC = () => {
 
           {activeTab === 'profile' && (
             <ProfilePage />
+          )}
+
+          {activeTab === 'product_detail' && (
+            <ProductDetailPage />
           )}
         </main>
       </div>

@@ -36,6 +36,10 @@ interface AppContextType {
   activeTab: string;
   setActiveTab: (tab: string) => void;
   
+  selectedProductDetail: { type: 'corn' | 'egg'; id: string } | null;
+  openProductDetail: (type: 'corn' | 'egg', id: string) => void;
+  closeProductDetail: () => void;
+  
   cornListings: CornListing[];
   eggListings: EggListing[];
   orders: TransactionOrder[];
@@ -171,6 +175,21 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   });
 
   const [activeTab, setActiveTab] = useState<string>('dashboard');
+  const [selectedProductDetail, setSelectedProductDetail] = useState<{ type: 'corn' | 'egg'; id: string } | null>(null);
+
+  const openProductDetail = (type: 'corn' | 'egg', id: string) => {
+    setSelectedProductDetail({ type, id });
+    setActiveTab('product_detail');
+  };
+
+  const closeProductDetail = () => {
+    if (selectedProductDetail?.type === 'egg') {
+      setActiveTab('market_eggs');
+    } else {
+      setActiveTab('market_corn');
+    }
+    setSelectedProductDetail(null);
+  };
 
   const [cornListings, setCornListings] = useState<CornListing[]>(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.CORN_LISTINGS);
@@ -998,6 +1017,9 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       switchUser,
       activeTab,
       setActiveTab,
+      selectedProductDetail,
+      openProductDetail,
+      closeProductDetail,
       cornListings,
       eggListings,
       orders,

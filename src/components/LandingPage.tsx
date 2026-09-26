@@ -37,7 +37,7 @@ interface LandingPageProps {
 }
 
 export const LandingPage: React.FC<LandingPageProps> = ({ onOpenAssistedRegister }) => {
-  const { loginAs } = useApp();
+  const { loginAs, openProductDetail } = useApp();
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authInitialMode, setAuthInitialMode] = useState<'login' | 'register'>('login');
   const [showTermsModal, setShowTermsModal] = useState(false);
@@ -700,7 +700,14 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenAssistedRegister
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '18px' }}>
             {/* Card 1: Jagung Pipil */}
-            <div className="card ticker-card scroll-card-reveal" style={{ padding: '20px', background: 'white', border: '1px solid var(--border-subtle)', boxShadow: 'var(--shadow-sm)' }}>
+            <div 
+              className="card ticker-card scroll-card-reveal" 
+              style={{ padding: '20px', background: 'white', border: '1px solid var(--border-subtle)', boxShadow: 'var(--shadow-sm)', cursor: 'pointer' }}
+              onClick={() => {
+                loginAs('bu_rahma');
+                openProductDetail('corn', 'crn_001');
+              }}
+            >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
                 <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--slate-800)', display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <Wheat size={16} style={{ color: 'var(--amber-600)' }} /> Jagung Pipil Kering Sigi
@@ -718,14 +725,25 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenAssistedRegister
               </div>
               <button 
                 className="btn btn-sm btn-harvest btn-full"
-                onClick={openRegister}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  loginAs('bu_rahma');
+                  openProductDetail('corn', 'crn_001');
+                }}
               >
-                Pesan Pakan Jagung Ini <ArrowRight size={14} />
+                Lihat Spesifikasi & Pesan <ArrowRight size={14} />
               </button>
             </div>
 
             {/* Card 2: Telur Grade A Palu */}
-            <div className="card ticker-card scroll-card-reveal" style={{ padding: '20px', background: 'white', border: '1px solid var(--border-subtle)', boxShadow: 'var(--shadow-sm)' }}>
+            <div 
+              className="card ticker-card scroll-card-reveal" 
+              style={{ padding: '20px', background: 'white', border: '1px solid var(--border-subtle)', boxShadow: 'var(--shadow-sm)', cursor: 'pointer' }}
+              onClick={() => {
+                loginAs('kak_dilla');
+                openProductDetail('egg', 'egg_001');
+              }}
+            >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
                 <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--slate-800)', display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <Egg size={16} style={{ color: 'var(--primary-600)' }} /> Telur Ayam Ras Balaroa
@@ -743,14 +761,25 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenAssistedRegister
               </div>
               <button 
                 className="btn btn-sm btn-primary btn-full"
-                onClick={openRegister}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  loginAs('kak_dilla');
+                  openProductDetail('egg', 'egg_001');
+                }}
               >
-                Buat Kontrak Pasokan UMKM <ArrowRight size={14} />
+                Lihat Detail & Kontrak B2B <ArrowRight size={14} />
               </button>
             </div>
 
             {/* Card 3: Telur Segar Kiloan */}
-            <div className="card ticker-card scroll-card-reveal" style={{ padding: '20px', background: 'white', border: '1px solid var(--border-subtle)', boxShadow: 'var(--shadow-sm)' }}>
+            <div 
+              className="card ticker-card scroll-card-reveal" 
+              style={{ padding: '20px', background: 'white', border: '1px solid var(--border-subtle)', boxShadow: 'var(--shadow-sm)', cursor: 'pointer' }}
+              onClick={() => {
+                loginAs('kak_dilla');
+                openProductDetail('egg', 'egg_002');
+              }}
+            >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
                 <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--slate-800)', display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <Egg size={16} style={{ color: '#2563eb' }} /> Telur Timbang Curah Sigi
@@ -768,10 +797,14 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenAssistedRegister
               </div>
               <button 
                 className="btn btn-sm btn-secondary btn-full"
-                onClick={openRegister}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  loginAs('kak_dilla');
+                  openProductDetail('egg', 'egg_002');
+                }}
                 style={{ background: 'var(--slate-50)' }}
               >
-                Lihat Opsi Katering <ArrowRight size={14} />
+                Lihat Detail Komoditas <ArrowRight size={14} />
               </button>
             </div>
           </div>

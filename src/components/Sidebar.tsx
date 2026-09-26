@@ -31,7 +31,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
     currentUser, 
     activeTab, 
     setActiveTab, 
-    logout 
+    logout,
+    selectedProductDetail
   } = useApp();
 
   const getRoleLabel = () => {
@@ -137,7 +138,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
           {navLinks.map(item => {
             const IconComp = item.icon;
             const isActive = activeTab === item.id || 
-              (item.id === 'dashboard' && activeTab.startsWith('dashboard'));
+              (item.id === 'dashboard' && activeTab.startsWith('dashboard')) ||
+              (activeTab === 'product_detail' && item.id === (selectedProductDetail?.type === 'egg' ? 'market_eggs' : 'market_corn'));
 
             return (
               <button

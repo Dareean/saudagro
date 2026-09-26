@@ -23,7 +23,8 @@ export const MarketplaceCorn: React.FC = () => {
     currentUser, 
     cornListings, 
     createCornOrder, 
-    createCornListing 
+    createCornListing,
+    openProductDetail
   } = useApp();
 
   const containerRef = useRef<HTMLDivElement>(null);
@@ -251,8 +252,13 @@ export const MarketplaceCorn: React.FC = () => {
         {filteredListings.map(item => {
           const isStandardFeed = item.moistureLevel <= 14.0;
           return (
-            <div key={item.id} className="card corn-card-item" style={{ borderRadius: '12px', overflow: 'hidden', border: '1px solid var(--border-subtle)' }}>
-              <div className="card-img-wrapper">
+            <div key={item.id} className="card corn-card-item" style={{ borderRadius: '12px', overflow: 'hidden', border: '1px solid var(--border-subtle)', display: 'flex', flexDirection: 'column' }}>
+              <div 
+                className="card-img-wrapper" 
+                onClick={() => openProductDetail('corn', item.id)}
+                style={{ cursor: 'pointer' }}
+                title="Klik untuk melihat spesifikasi detail produk"
+              >
                 <img 
                   src={item.images[0]} 
                   alt={item.code} 
@@ -281,7 +287,12 @@ export const MarketplaceCorn: React.FC = () => {
 
               <div className="card-body">
                 <div>
-                  <div className="card-farmer-info">
+                  <div 
+                    className="card-farmer-info"
+                    onClick={() => openProductDetail('corn', item.id)}
+                    style={{ cursor: 'pointer' }}
+                    title="Klik untuk melihat spesifikasi detail produk"
+                  >
                     <div className="card-farmer-name">
                       {item.farmerName}
                       <span title="Petani Terverifikasi"><ShieldCheck size={14} style={{ color: '#047857' }} /></span>
@@ -292,7 +303,11 @@ export const MarketplaceCorn: React.FC = () => {
                     <MapPin size={12} /> {item.village}, {item.district}
                   </div>
 
-                  <p className="card-desc">
+                  <p 
+                    className="card-desc"
+                    onClick={() => openProductDetail('corn', item.id)}
+                    style={{ cursor: 'pointer' }}
+                  >
                     {item.description}
                   </p>
 

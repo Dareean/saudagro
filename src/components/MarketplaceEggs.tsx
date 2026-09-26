@@ -24,7 +24,8 @@ export const MarketplaceEggs: React.FC = () => {
     eggListings, 
     createEggOrder, 
     createB2BContract, 
-    createEggListing 
+    createEggListing,
+    openProductDetail
   } = useApp();
 
   const containerRef = useRef<HTMLDivElement>(null);
@@ -265,8 +266,13 @@ export const MarketplaceEggs: React.FC = () => {
       {/* Egg Listings Grid - Compact & Responsive */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '16px' }}>
         {filteredListings.map(item => (
-          <div key={item.id} className="card egg-card-item" style={{ borderRadius: '12px', overflow: 'hidden', border: '1px solid var(--border-subtle)' }}>
-            <div className="card-img-wrapper">
+          <div key={item.id} className="card egg-card-item" style={{ borderRadius: '12px', overflow: 'hidden', border: '1px solid var(--border-subtle)', display: 'flex', flexDirection: 'column' }}>
+            <div 
+              className="card-img-wrapper" 
+              onClick={() => openProductDetail('egg', item.id)}
+              style={{ cursor: 'pointer' }}
+              title="Klik untuk melihat spesifikasi detail produk"
+            >
               <img 
                 src={item.images[0]} 
                 alt={item.code} 
@@ -289,7 +295,12 @@ export const MarketplaceEggs: React.FC = () => {
 
             <div className="card-body">
               <div>
-                <div className="card-farmer-info">
+                <div 
+                  className="card-farmer-info"
+                  onClick={() => openProductDetail('egg', item.id)}
+                  style={{ cursor: 'pointer' }}
+                  title="Klik untuk melihat spesifikasi detail produk"
+                >
                   <div className="card-farmer-name">
                     {item.farmerName}
                     <span title="Peternak Terverifikasi"><ShieldCheck size={14} style={{ color: '#047857' }} /></span>
@@ -300,7 +311,11 @@ export const MarketplaceEggs: React.FC = () => {
                   <MapPin size={12} /> {item.village}, {item.district}
                 </div>
 
-                <p className="card-desc">
+                <p 
+                  className="card-desc"
+                  onClick={() => openProductDetail('egg', item.id)}
+                  style={{ cursor: 'pointer' }}
+                >
                   {item.description}
                 </p>
 
