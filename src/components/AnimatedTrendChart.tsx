@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 
 export interface DataPoint {
   label: string;
@@ -7,7 +7,7 @@ export interface DataPoint {
   dateStr?: string;
 }
 
-interface AnimatedTrendChartProps {
+export interface AnimatedTrendChartProps {
   title: string;
   subtitle?: string;
   unit?: string;
@@ -17,6 +17,7 @@ interface AnimatedTrendChartProps {
   primaryLegend?: string;
   secondaryLegend?: string;
   data: DataPoint[];
+  periodDataMap?: Record<string, DataPoint[]>;
   periods?: string[];
   height?: number;
   formatValue?: (val: number) => string;
@@ -32,44 +33,143 @@ export const AnimatedTrendChart: React.FC<AnimatedTrendChartProps> = ({
   secondaryColor = '#3B82F6',
   primaryLegend = 'Harga Realisasi',
   secondaryLegend,
-  data,
-  periods = ['30 Hari', '3 Bulan', '6 Bulan'],
+  data: initialData,
+  periodDataMap,
+  periods = ['7 Hari', '30 Hari', '3 Bulan', '6 Bulan'],
   height = 220,
   formatValue = (v) => v.toLocaleString('id-ID'),
   formatSecondaryValue = (v) => v.toLocaleString('id-ID'),
 }) => {
-  const [activePeriod, setActivePeriod] = useState(periods[0] || '30 Hari');
+  const [activePeriod, setActivePeriod] = useState(periods.includes('30 Hari') ? '30 Hari' : periods[0] || '30 Hari');
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
-  if (!data || data.length === 0) return null;
+  // Compute dataset for selected period
+  const currentData: DataPoint[] = useMemo(() => {
+    if (periodDataMap && periodDataMap[activePeriod]) {
+      return periodDataMap[activePeriod];
+    }
+    if (!initialData || initialData.length === 0) return [];
+
+    const baseLen = initialData.length;
+    const baseFirst = initialData[0];
+    const baseLast = initialData[baseLen - 1];
+    const baseAvg = initialData.reduce((acc, d) => acc + d.value, 0) / baseLen;
+    const baseSecAvg = initialData.reduce((acc, d) => acc + (d.secondaryValue || 0), 0) / baseLen;
+
+    if (activePeriod === '7 Hari') {
+      const days = ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Hari Ini'];
+      const varianceFactors = [-0.02, -0.01, 0.01, 0.03, 0.02, 0.04, 0.05];
+      return days.map((day, idx) => {
+        const factor = 1 + varianceFactors[idx];
+        const val = Math.round(baseLast.value * factor);
+        const secVal = baseLast.secondaryValue !== undefined 
+          ? Math.round(baseLast.secondaryValue * (1 + varianceFactors[idx] * 0.8))
+          : undefined;
+        return {
+          label: day,
+          dateStr: `Hari ke-${idx + 1} (${day})`,
+          value: Math.max(1, val),
+          secondaryValue: secVal
+        };
+      });
+    }
+
+    if (activePeriod === '30 Hari') {
+      const weeks = ['Mgg 1', 'Mgg 2', 'Mgg 3', 'Mgg 4', 'Hari Ini'];
+      const varianceFactors = [-0.05, -0.02, 0.01, 0.03, 0.05];
+      return weeks.map((w, idx) => {
+        const factor = 1 + varianceFactors[idx];
+        const val = Math.round(baseAvg * factor);
+        const secVal = baseSecAvg > 0 
+          ? Math.round(baseSecAvg * (1 + varianceFactors[idx] * 0.75))
+          : undefined;
+        return {
+          label: w,
+          dateStr: `Periode ${w} (30 Hari Terakhir)`,
+          value: Math.max(1, val),
+          secondaryValue: secVal
+        };
+      });
+    }
+
+    if (activePeriod === '3 Bulan') {
+      const months3 = ['Bln -2 (A)', 'Bln -2 (B)', 'Bln -1 (A)', 'Bln -1 (B)', 'Bln Ini (A)', 'Bln Ini (B)'];
+      const varianceFactors = [-0.08, -0.05, -0.02, 0.02, 0.04, 0.07];
+      return months3.map((m, idx) => {
+        const factor = 1 + varianceFactors[idx];
+        const val = Math.round(baseAvg * factor);
+        const secVal = baseSecAvg > 0 
+          ? Math.round(baseSecAvg * (1 + varianceFactors[idx] * 0.7))
+          : undefined;
+        return {
+          label: m,
+          dateStr: `Triwulan Checkpoint ${m}`,
+          value: Math.max(1, val),
+          secondaryValue: secVal
+        };
+      });
+    }
+
+    if (activePeriod === '6 Bulan') {
+      const months6 = ['Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt'];
+      const varianceFactors = [-0.12, -0.07, -0.03, 0.01, 0.05, 0.09];
+      return months6.map((m, idx) => {
+        const factor = 1 + varianceFactors[idx];
+        const val = Math.round(baseAvg * factor);
+        const secVal = baseSecAvg > 0 
+          ? Math.round(baseSecAvg * (1 + varianceFactors[idx] * 0.65))
+          : undefined;
+        return {
+          label: m,
+          dateStr: `Bulan ${m} 2026`,
+          value: Math.max(1, val),
+          secondaryValue: secVal
+        };
+      });
+    }
+
+    return initialData;
+  }, [initialData, activePeriod, periodDataMap]);
+
+  if (!currentData || currentData.length === 0) return null;
+
+  const hasSecondary = Boolean(secondaryLegend && currentData.some(d => d.secondaryValue !== undefined));
+
+  // Compute Metrics
+  const primaryValues = currentData.map(d => d.value);
+  const primaryAvg = primaryValues.reduce((a, b) => a + b, 0) / primaryValues.length;
+  const primaryMax = Math.max(...primaryValues);
+  const primaryFirst = primaryValues[0];
+  const primaryLast = primaryValues[primaryValues.length - 1];
+  const primaryDeltaPercent = primaryFirst !== 0 ? ((primaryLast - primaryFirst) / primaryFirst) * 100 : 0;
+
+  const secondaryValues = hasSecondary ? currentData.map(d => d.secondaryValue || 0) : [];
+  const secondaryAvg = hasSecondary && secondaryValues.length > 0
+    ? secondaryValues.reduce((a, b) => a + b, 0) / secondaryValues.length
+    : 0;
 
   const svgWidth = 700;
   const svgHeight = height;
-  const paddingX = 45;
-  const paddingTop = 25;
-  const paddingBottom = 35;
+  const paddingX = 46;
+  const paddingTop = 22;
+  const paddingBottom = 32;
 
   const chartWidth = svgWidth - paddingX * 2;
   const chartHeight = svgHeight - paddingTop - paddingBottom;
 
-  const primaryValues = data.map(d => d.value);
-  const minVal = Math.min(...primaryValues) * 0.96;
-  const maxVal = Math.max(...primaryValues) * 1.04;
+  const minVal = Math.min(...primaryValues) * 0.95;
+  const maxVal = Math.max(...primaryValues) * 1.05;
   const valRange = maxVal - minVal || 1;
 
-  // Secondary values if exists
-  const hasSecondary = data.some(d => d.secondaryValue !== undefined);
-  const secondaryValues = hasSecondary ? data.map(d => d.secondaryValue || 0) : [];
-  const minSec = hasSecondary ? Math.min(...secondaryValues) * 0.9 : 0;
-  const maxSec = hasSecondary ? Math.max(...secondaryValues) * 1.1 : 1;
+  const minSec = hasSecondary ? Math.min(...secondaryValues) * 0.92 : 0;
+  const maxSec = hasSecondary ? Math.max(...secondaryValues) * 1.08 : 1;
   const secRange = maxSec - minSec || 1;
 
-  // Coordinate mapper
-  const getX = (index: number) => paddingX + (index / (data.length - 1)) * chartWidth;
+  const getX = (index: number) => paddingX + (index / (currentData.length - 1)) * chartWidth;
   const getY = (val: number) => paddingTop + chartHeight - ((val - minVal) / valRange) * chartHeight;
   const getSecY = (val: number) => paddingTop + chartHeight - ((val - minSec) / secRange) * chartHeight;
 
-  // Generate smooth cubic bezier SVG path
+  // Catmull-Rom or Cubic Bezier smooth spline generator
   const generateSmoothPath = (pts: { x: number; y: number }[]) => {
     if (pts.length === 0) return '';
     if (pts.length === 1) return `M ${pts[0].x} ${pts[0].y}`;
@@ -91,110 +191,141 @@ export const AnimatedTrendChart: React.FC<AnimatedTrendChartProps> = ({
     return path;
   };
 
-  const primaryPoints = data.map((d, i) => ({ x: getX(i), y: getY(d.value) }));
+  const primaryPoints = currentData.map((d, i) => ({ x: getX(i), y: getY(d.value) }));
   const primaryLinePath = generateSmoothPath(primaryPoints);
-  const primaryAreaPath = `${primaryLinePath} L ${primaryPoints[primaryPoints.length - 1].x} ${paddingTop + chartHeight} L ${primaryPoints[0].x} ${paddingTop + chartHeight} Z`;
+  const primaryAreaPath = primaryPoints.length > 0 
+    ? `${primaryLinePath} L ${primaryPoints[primaryPoints.length - 1].x} ${paddingTop + chartHeight} L ${primaryPoints[0].x} ${paddingTop + chartHeight} Z`
+    : '';
 
-  const secondaryPoints = hasSecondary ? data.map((d, i) => ({ x: getX(i), y: getSecY(d.secondaryValue || 0) })) : [];
+  const secondaryPoints = hasSecondary ? currentData.map((d, i) => ({ x: getX(i), y: getSecY(d.secondaryValue || 0) })) : [];
   const secondaryLinePath = hasSecondary ? generateSmoothPath(secondaryPoints) : '';
 
-  // Grid lines (4 horizontal ticks)
   const gridTicks = [0, 0.33, 0.66, 1].map(ratio => {
     const val = minVal + ratio * valRange;
     const y = paddingTop + chartHeight - ratio * chartHeight;
     return { val, y };
   });
 
-  const hoveredData = hoveredIndex !== null ? data[hoveredIndex] : null;
+  const hoveredData = hoveredIndex !== null ? currentData[hoveredIndex] : null;
   const hoveredPoint = hoveredIndex !== null ? primaryPoints[hoveredIndex] : null;
+
+  const cleanId = title.replace(/[^a-zA-Z0-9]/g, '');
 
   return (
     <div style={{
       background: '#FFFFFF',
       border: '1px solid var(--border-subtle)',
-      borderRadius: '12px',
+      borderRadius: '14px',
       padding: '20px 22px',
-      overflow: 'hidden'
+      position: 'relative'
     }}>
-      {/* Header with Title, Period Filter & Legend */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px', marginBottom: '16px' }}>
+      {/* Header with Title and Period Filter Pills */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', marginBottom: '14px' }}>
         <div>
-          <h3 style={{ fontSize: '0.94rem', fontWeight: 800, color: 'var(--slate-900)', margin: 0, letterSpacing: '-0.01em' }}>
-            {title}
-          </h3>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <h3 style={{ fontSize: '0.94rem', fontWeight: 800, color: 'var(--slate-900)', margin: 0, letterSpacing: '-0.01em' }}>
+              {title}
+            </h3>
+            <span style={{
+              fontSize: '0.68rem',
+              fontWeight: 700,
+              padding: '2px 7px',
+              borderRadius: '6px',
+              background: primaryDeltaPercent >= 0 ? '#ECFDF5' : '#FEF2F2',
+              color: primaryDeltaPercent >= 0 ? '#047857' : '#DC2626',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '2px'
+            }}>
+              {primaryDeltaPercent >= 0 ? '▲ +' : '▼ '}{primaryDeltaPercent.toFixed(1)}%
+            </span>
+          </div>
           {subtitle && (
-            <p style={{ fontSize: '0.76rem', color: 'var(--slate-500)', margin: '3px 0 0 0' }}>
+            <p style={{ fontSize: '0.74rem', color: 'var(--slate-500)', margin: '3px 0 0 0' }}>
               {subtitle}
             </p>
           )}
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
-          {/* Legend */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '14px', fontSize: '0.74rem', color: 'var(--slate-600)', fontWeight: 600 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span style={{ width: '10px', height: '10px', borderRadius: '3px', background: primaryColor }} />
-              <span>{primaryLegend}</span>
-            </div>
-            {hasSecondary && secondaryLegend && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <span style={{ width: '10px', height: '10px', borderRadius: '3px', background: secondaryColor }} />
-                <span>{secondaryLegend}</span>
-              </div>
-            )}
-          </div>
-
-          {/* Period selector */}
-          {periods.length > 1 && (
-            <div style={{ display: 'flex', background: 'var(--slate-100)', padding: '2px', borderRadius: '7px' }}>
-              {periods.map(p => (
+        {/* Period Pills Filter */}
+        {periods.length > 1 && (
+          <div style={{ display: 'flex', background: '#F1F5F9', padding: '3px', borderRadius: '8px', gap: '2px' }}>
+            {periods.map(p => {
+              const isActive = activePeriod === p;
+              return (
                 <button
                   key={p}
                   type="button"
-                  onClick={() => setActivePeriod(p)}
+                  onClick={() => {
+                    setActivePeriod(p);
+                    setHoveredIndex(null);
+                  }}
                   style={{
                     border: 'none',
-                    background: activePeriod === p ? '#FFFFFF' : 'transparent',
-                    color: activePeriod === p ? 'var(--slate-900)' : 'var(--slate-500)',
-                    fontWeight: activePeriod === p ? 700 : 500,
+                    background: isActive ? '#FFFFFF' : 'transparent',
+                    color: isActive ? '#0F172A' : '#64748B',
+                    fontWeight: isActive ? 700 : 500,
                     fontSize: '0.72rem',
-                    padding: '3px 9px',
-                    borderRadius: '5px',
+                    padding: '4px 10px',
+                    borderRadius: '6px',
                     cursor: 'pointer',
-                    boxShadow: activePeriod === p ? '0 1px 2px rgba(0,0,0,0.06)' : 'none',
-                    transition: 'all 0.15s ease'
+                    boxShadow: isActive ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
+                    transition: 'all 0.18s ease'
                   }}
                 >
                   {p}
                 </button>
-              ))}
-            </div>
-          )}
-        </div>
+              );
+            })}
+          </div>
+        )}
       </div>
 
-      {/* SVG Interactive Chart Canvas */}
-      <div style={{ position: 'relative', width: '100%', height: `${height}px` }}>
+      {/* Subtle KPI Summary Strip */}
+      <div style={{
+        display: 'flex',
+        gap: '20px',
+        alignItems: 'center',
+        padding: '8px 0',
+        marginBottom: '10px',
+        borderBottom: '1px solid #F1F5F9',
+        fontSize: '0.76rem',
+        color: 'var(--slate-600)'
+      }}>
+        <div>
+          <span style={{ color: 'var(--slate-400)', marginRight: '6px' }}>Rata-rata:</span>
+          <strong style={{ color: 'var(--slate-900)' }}>{unit === 'Rp' ? 'Rp ' : ''}{formatValue(Math.round(primaryAvg))} {unit !== 'Rp' ? unit : ''}</strong>
+        </div>
+        <div>
+          <span style={{ color: 'var(--slate-400)', marginRight: '6px' }}>Tertinggi:</span>
+          <strong style={{ color: primaryColor }}>{unit === 'Rp' ? 'Rp ' : ''}{formatValue(Math.round(primaryMax))} {unit !== 'Rp' ? unit : ''}</strong>
+        </div>
+        {hasSecondary && secondaryAvg > 0 && (
+          <div>
+            <span style={{ color: 'var(--slate-400)', marginRight: '6px' }}>{secondaryLegend}:</span>
+            <strong style={{ color: secondaryColor }}>{formatSecondaryValue(Math.round(secondaryAvg))} {secondaryUnit}</strong>
+          </div>
+        )}
+      </div>
+
+      {/* SVG Interactive Canvas */}
+      <div key={activePeriod} style={{ position: 'relative', width: '100%', height: `${height}px` }}>
         <svg
           viewBox={`0 0 ${svgWidth} ${svgHeight}`}
           style={{ width: '100%', height: '100%', overflow: 'visible' }}
           onMouseLeave={() => setHoveredIndex(null)}
         >
           <defs>
-            <linearGradient id={`areaGrad-${title.replace(/\s+/g, '')}`} x1="0%" y1="0%" x2="0%" y2="100%">
+            <linearGradient id={`areaGrad-${cleanId}`} x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stopColor={primaryColor} stopOpacity="0.18" />
-              <stop offset="100%" stopColor={primaryColor} stopOpacity="0.01" />
+              <stop offset="100%" stopColor={primaryColor} stopOpacity="0.0" />
             </linearGradient>
-            <linearGradient id={`secGrad-${title.replace(/\s+/g, '')}`} x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stopColor={secondaryColor} stopOpacity="0.12" />
-              <stop offset="100%" stopColor={secondaryColor} stopOpacity="0.0" />
-            </linearGradient>
-            <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
-              <feDropShadow dx="0" dy="2" stdDeviation="3" floodOpacity="0.15" />
+            <filter id="shadowFilter" x="-20%" y="-20%" width="140%" height="140%">
+              <feDropShadow dx="0" dy="2" stdDeviation="2" floodOpacity="0.12" />
             </filter>
           </defs>
 
-          {/* Horizontal Gridlines & Left Labels */}
+          {/* Grid lines */}
           {gridTicks.map((t, idx) => (
             <g key={idx}>
               <line
@@ -208,7 +339,7 @@ export const AnimatedTrendChart: React.FC<AnimatedTrendChartProps> = ({
               />
               <text
                 x={paddingX - 8}
-                y={t.y + 3}
+                y={t.y + 3.5}
                 fill="#94A3B8"
                 fontSize="10"
                 textAnchor="end"
@@ -226,41 +357,39 @@ export const AnimatedTrendChart: React.FC<AnimatedTrendChartProps> = ({
               fill="none"
               stroke={secondaryColor}
               strokeWidth="2"
-              strokeDasharray="3 3"
-              opacity="0.8"
+              strokeDasharray="4 3"
+              opacity="0.75"
+              className="chart-smooth-path"
             />
           )}
 
-          {/* Primary Gradient Area with Fade-in Animation */}
-          <path
-            d={primaryAreaPath}
-            fill={`url(#areaGrad-${title.replace(/\s+/g, '')})`}
-            style={{
-              animation: 'chartAreaFadeIn 0.8s ease-out forwards',
-              opacity: 0
-            }}
-          />
+          {/* Primary Gradient Area with smooth fade-in */}
+          {primaryAreaPath && (
+            <path
+              d={primaryAreaPath}
+              fill={`url(#areaGrad-${cleanId})`}
+              className="chart-fade-area"
+            />
+          )}
 
-          {/* Primary Smooth Curve Line with Draw-in Animation */}
-          <path
-            d={primaryLinePath}
-            fill="none"
-            stroke={primaryColor}
-            strokeWidth="2.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            style={{
-              strokeDasharray: 2000,
-              strokeDashoffset: 2000,
-              animation: 'chartLineDraw 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards'
-            }}
-          />
+          {/* Primary Line with smooth draw-in */}
+          {primaryLinePath && (
+            <path
+              d={primaryLinePath}
+              fill="none"
+              stroke={primaryColor}
+              strokeWidth="2.6"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="chart-draw-line"
+            />
+          )}
 
-          {/* X Axis Date Labels */}
-          {data.map((d, i) => {
+          {/* X Axis Labels */}
+          {currentData.map((d, i) => {
             const x = getX(i);
-            const isEverySecond = data.length > 8 ? i % 2 === 0 : true;
-            if (!isEverySecond && i !== data.length - 1) return null;
+            const isEverySecond = currentData.length > 8 ? i % 2 === 0 : true;
+            if (!isEverySecond && i !== currentData.length - 1) return null;
             return (
               <text
                 key={i}
@@ -269,14 +398,14 @@ export const AnimatedTrendChart: React.FC<AnimatedTrendChartProps> = ({
                 fill="#94A3B8"
                 fontSize="10"
                 textAnchor="middle"
-                fontWeight="500"
+                fontWeight={i === currentData.length - 1 ? '700' : '500'}
               >
                 {d.label}
               </text>
             );
           })}
 
-          {/* Hover Crosshair Vertical Line */}
+          {/* Hover Crosshair & Dots */}
           {hoveredPoint && (
             <g>
               <line
@@ -284,8 +413,8 @@ export const AnimatedTrendChart: React.FC<AnimatedTrendChartProps> = ({
                 y1={paddingTop}
                 x2={hoveredPoint.x}
                 y2={paddingTop + chartHeight}
-                stroke="#64748B"
-                strokeWidth="1.2"
+                stroke="#94A3B8"
+                strokeWidth="1"
                 strokeDasharray="3 3"
               />
               <circle
@@ -295,9 +424,9 @@ export const AnimatedTrendChart: React.FC<AnimatedTrendChartProps> = ({
                 fill="#FFFFFF"
                 stroke={primaryColor}
                 strokeWidth="2.5"
-                filter="url(#shadow)"
+                filter="url(#shadowFilter)"
               />
-              {hasSecondary && hoveredIndex !== null && (
+              {hasSecondary && hoveredIndex !== null && secondaryPoints[hoveredIndex] && (
                 <circle
                   cx={hoveredPoint.x}
                   cy={secondaryPoints[hoveredIndex].y}
@@ -310,9 +439,9 @@ export const AnimatedTrendChart: React.FC<AnimatedTrendChartProps> = ({
             </g>
           )}
 
-          {/* Invisible hover hotspot zones for each data column */}
-          {data.map((_, i) => {
-            const colWidth = chartWidth / (data.length - 1);
+          {/* Hover hitboxes */}
+          {currentData.map((_, i) => {
+            const colWidth = chartWidth / (currentData.length - 1 || 1);
             const x = getX(i) - colWidth / 2;
             return (
               <rect
@@ -329,13 +458,13 @@ export const AnimatedTrendChart: React.FC<AnimatedTrendChartProps> = ({
           })}
         </svg>
 
-        {/* Floating Tooltip Box on Hover */}
+        {/* Hover Tooltip */}
         {hoveredData && hoveredPoint && (
           <div
             style={{
               position: 'absolute',
               left: `${(hoveredPoint.x / svgWidth) * 100}%`,
-              top: `${Math.max(10, (hoveredPoint.y / svgHeight) * 100 - 35)}%`,
+              top: `${Math.max(4, (hoveredPoint.y / svgHeight) * 100 - 36)}%`,
               transform: 'translate(-50%, -100%)',
               background: '#0F172A',
               color: '#FFFFFF',
@@ -345,12 +474,11 @@ export const AnimatedTrendChart: React.FC<AnimatedTrendChartProps> = ({
               fontWeight: 600,
               pointerEvents: 'none',
               whiteSpace: 'nowrap',
-              boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.18)',
               zIndex: 10,
               display: 'flex',
               flexDirection: 'column',
-              gap: '2px',
-              transition: 'all 0.1s ease-out'
+              gap: '2px'
             }}
           >
             <div style={{ color: '#94A3B8', fontSize: '0.66rem', fontWeight: 500 }}>
@@ -358,7 +486,7 @@ export const AnimatedTrendChart: React.FC<AnimatedTrendChartProps> = ({
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
               <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: primaryColor }} />
-              <span>{primaryLegend}: <strong>{unit === 'Rp' ? `Rp ` : ''}{formatValue(hoveredData.value)} {unit !== 'Rp' ? unit : ''}</strong></span>
+              <span>{primaryLegend}: <strong>{unit === 'Rp' ? 'Rp ' : ''}{formatValue(hoveredData.value)} {unit !== 'Rp' ? unit : ''}</strong></span>
             </div>
             {hasSecondary && hoveredData.secondaryValue !== undefined && (
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -370,13 +498,41 @@ export const AnimatedTrendChart: React.FC<AnimatedTrendChartProps> = ({
         )}
       </div>
 
+      {/* Legend Footer */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginTop: '10px', fontSize: '0.72rem', color: 'var(--slate-600)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <span style={{ width: '10px', height: '10px', borderRadius: '2px', background: primaryColor }} />
+          <span>{primaryLegend}</span>
+        </div>
+        {hasSecondary && secondaryLegend && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <span style={{ width: '10px', height: '10px', borderRadius: '2px', background: secondaryColor }} />
+            <span>{secondaryLegend}</span>
+          </div>
+        )}
+      </div>
+
       <style>{`
-        @keyframes chartLineDraw {
+        .chart-draw-line {
+          stroke-dasharray: 2000;
+          stroke-dashoffset: 2000;
+          animation: drawChartLine 0.75s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        .chart-fade-area {
+          opacity: 0;
+          animation: fadeInChartArea 0.6s ease-out 0.15s forwards;
+        }
+        .chart-smooth-path {
+          stroke-dasharray: 2000;
+          stroke-dashoffset: 2000;
+          animation: drawChartLine 0.75s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        @keyframes drawChartLine {
           to {
-            strokeDashoffset: 0;
+            stroke-dashoffset: 0;
           }
         }
-        @keyframes chartAreaFadeIn {
+        @keyframes fadeInChartArea {
           to {
             opacity: 1;
           }
